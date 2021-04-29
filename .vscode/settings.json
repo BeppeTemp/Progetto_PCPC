@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "*.js": "javascript",
+        "stdio.h": "c",
+        "string": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "time.h": "c",
+        "stdlib.h": "c",
+        "system_error": "c",
+        "unordered_map": "c",
+        "ranges": "c",
+        "typeinfo": "c",
+        "functional": "c"
+    }
+}
