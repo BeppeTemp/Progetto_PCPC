@@ -425,16 +425,24 @@ int calcMembership(Data data, int rank, int emp_pos, int wd_size) {
 
     return (emp_pos >= start && emp_pos < finish);
 }
-void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size) {
+void localmove(Data data, Message msg, int *lc_reset, int rank) {
+    for (int i = 0; i < msg.n_agents; i++) {
+        data.sub_mat[msg.id_agents[i] - data.sec_disp[rank]] = msg.vl_agents[i];
+        data.sub_mat[lc_reset[i]] = ' ';
+    }
+}
+void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_Request request, MPI_Status status) {
     Message *all_msg = malloc(sizeof(Message) * wd_size);
     int *lc_moves = malloc(sizeof(int) * n_moves);
 
+    //Messages inizialization
     for (int i = 0; i < wd_size; i++) {
         all_msg[i].n_agents = 0;
         all_msg[i].id_agents = malloc(sizeof(int) * n_moves);
         all_msg[i].vl_agents = malloc(sizeof(char) * n_moves);
     }
 
+    //Messages creation
     for (int i = 0; i < wd_size; i++) {
         for (int j = 0; j < n_moves; j++) {
             if (calcMembership(data, i, data.my_emp_slots[j], wd_size)) {
@@ -446,16 +454,16 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size) {
         }
     }
 
+    //Free extra space
     if (all_msg[rank].n_agents == 0) free(lc_moves);
-
     for (int i = 0; i < wd_size; i++) {
         all_msg[i].id_agents = realloc(all_msg[i].id_agents, sizeof(int) * all_msg[i].n_agents);
         all_msg[i].vl_agents = realloc(all_msg[i].vl_agents, sizeof(char) * all_msg[i].n_agents);
         if (i == rank && all_msg[i].n_agents != 0) lc_moves = realloc(lc_moves, sizeof(int) * all_msg[i].n_agents);
     }
 
-    printf("I messaggi che manderò: \n\n");
-
+    //Debug log
+    /*printf("I messaggi che manderò: \n\n");
     for (int i = 0; i < wd_size; i++) {
         if (i != rank) {
             if (all_msg[i].n_agents != 0) {
@@ -484,6 +492,42 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size) {
             }
             printf("\n");
         }
+    }*/
+
+    //Messages send
+    char message[BUFSIZ];
+    int position;
+    for (int i = 0; i < wd_size; i++) {
+        if (i != rank) {
+            //External moves
+            position = 0;
+            MPI_Pack(&all_msg[i].n_agents, 1, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
+            MPI_Pack(all_msg[i].id_agents, all_msg[i].n_agents, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
+            MPI_Pack(all_msg[i].vl_agents, all_msg[i].n_agents, MPI_CHAR, message, BUFSIZ, &position, MPI_COMM_WORLD);
+
+            printf("invio a %d \n", i);
+            MPI_Isend(message, BUFSIZ, MPI_PACKED, i, 0, MPI_COMM_WORLD, &request);
+
+        } else {
+            //Internal moves
+            if (all_msg[i].n_agents != 0) {
+                localmove(data, all_msg[i], lc_moves, rank);
+            }
+        }
+    }
+
+    printf("\n");
+
+    for (int i = 0; i < wd_size; i++) {
+        //! Problema sulla ricezione
+        if (i != rank) {
+            printf("Sono in attesa di %d \n", i);
+            MPI_Recv(message, BUFSIZ, MPI_PACKED, i, 0, MPI_COMM_WORLD, &status);
+
+            //position = 0;
+            //MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].n_agents, 1, MPI_INT, MPI_COMM_WORLD);
+            //printf("Ho ricevuto %d spostamenti \n\n", all_msg[rank].n_agents);
+        }
     }
 
     //send
@@ -501,14 +545,6 @@ void main() {
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &wd_size);
-
-    //MPI_Struct definition
-    MPI_Datatype node_data_type;
-    int blockcounts[2] = {4, 1};
-    MPI_Aint offsets[2] = {0, sizeof(int) * 4};
-    MPI_Datatype oldtypes[2] = {MPI_INT, MPI_LONG};
-    MPI_Type_create_struct(2, blockcounts, offsets, oldtypes, &node_data_type);
-    MPI_Type_commit(&node_data_type);
 
     //Matrix generation
     if (rank == MASTER) {
@@ -570,7 +606,7 @@ void main() {
     //! ----- //
 
     //Spostamento degli agenti
-    moveAgents(data, moves, n_moves, rank, wd_size);
+    moveAgents(data, moves, n_moves, rank, wd_size, request, status);
 
     //! Debug //
     //* printf("Qui processo %d 👨‍🔧, ho ricevuto: \n", rank);
