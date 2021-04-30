@@ -17,7 +17,7 @@
     {
       "type": "shell",
       "label": "MPI compile and run active file (BASIC)",
-      "command": "mpicc -g ${fileDirname}/${fileBasename} -o Compiled/${fileBasenameNoExtension}.out && mpirun --allow-run-as-root -np ${input:np} Compiled/${fileBasenameNoExtension}.out",
+      "command": "mpicc -g ${fileDirname}/${fileBasename} -o Compiled/${fileBasenameNoExtension}.out && mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np ${input:np} Compiled/${fileBasenameNoExtension}.out",
       "presentation": {
         "reveal": "always"
       },

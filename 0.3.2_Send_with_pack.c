@@ -425,10 +425,15 @@ int calcMembership(Data data, int rank, int emp_pos, int wd_size) {
 
     return (emp_pos >= start && emp_pos < finish);
 }
-void localmove(Data data, Message msg, int *lc_reset, int rank) {
+void offlineMove(Data data, Message msg, int *lc_reset, int rank) {
     for (int i = 0; i < msg.n_agents; i++) {
         data.sub_mat[msg.id_agents[i] - data.sec_disp[rank]] = msg.vl_agents[i];
         data.sub_mat[lc_reset[i]] = ' ';
+    }
+}
+void onlineMove(Data data, Message msg, int rank) {
+    for (int i = 0; i < msg.n_agents; i++) {
+        data.sub_mat[msg.id_agents[i] - data.sec_disp[rank]] = msg.vl_agents[i];
     }
 }
 void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_Request request, MPI_Status status) {
@@ -456,11 +461,6 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
 
     //Free extra space
     if (all_msg[rank].n_agents == 0) free(lc_moves);
-    for (int i = 0; i < wd_size; i++) {
-        all_msg[i].id_agents = realloc(all_msg[i].id_agents, sizeof(int) * all_msg[i].n_agents);
-        all_msg[i].vl_agents = realloc(all_msg[i].vl_agents, sizeof(char) * all_msg[i].n_agents);
-        if (i == rank && all_msg[i].n_agents != 0) lc_moves = realloc(lc_moves, sizeof(int) * all_msg[i].n_agents);
-    }
 
     //Debug log
     /*printf("I messaggi che manderò: \n\n");
@@ -476,7 +476,6 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             } else {
                 printf("Al rank %d niente.\n", i);
             }
-            printf("\n");
         } else {
             if (all_msg[i].n_agents != 0) {
                 printf("A me stesso\n");
@@ -490,8 +489,8 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             } else {
                 printf("A me stesso niente.\n");
             }
-            printf("\n");
         }
+        printf("\n");
     }*/
 
     //Messages send
@@ -505,32 +504,46 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             MPI_Pack(all_msg[i].id_agents, all_msg[i].n_agents, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
             MPI_Pack(all_msg[i].vl_agents, all_msg[i].n_agents, MPI_CHAR, message, BUFSIZ, &position, MPI_COMM_WORLD);
 
-            printf("invio a %d \n", i);
             MPI_Isend(message, BUFSIZ, MPI_PACKED, i, 0, MPI_COMM_WORLD, &request);
 
+            free(all_msg[i].id_agents);
+            free(all_msg[i].vl_agents);
         } else {
             //Internal moves
             if (all_msg[i].n_agents != 0) {
-                localmove(data, all_msg[i], lc_moves, rank);
+                offlineMove(data, all_msg[i], lc_moves, rank);
+
+                free(all_msg[i].id_agents);
+                free(all_msg[i].vl_agents);
+                free(lc_moves);
             }
         }
     }
 
-    printf("\n");
-
     for (int i = 0; i < wd_size; i++) {
-        //! Problema sulla ricezione
         if (i != rank) {
-            printf("Sono in attesa di %d \n", i);
             MPI_Recv(message, BUFSIZ, MPI_PACKED, i, 0, MPI_COMM_WORLD, &status);
 
-            //position = 0;
-            //MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].n_agents, 1, MPI_INT, MPI_COMM_WORLD);
-            //printf("Ho ricevuto %d spostamenti \n\n", all_msg[rank].n_agents);
+            position = 0;
+            MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].n_agents, 1, MPI_INT, MPI_COMM_WORLD);
+            all_msg[rank].id_agents = malloc(sizeof(int) * n_moves);
+            all_msg[rank].vl_agents = malloc(sizeof(char) * n_moves);
+
+            if (all_msg[rank].n_agents != 0) {
+                MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].id_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
+                MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].vl_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
+
+                printf("%d: Numero di spostamenti: %d\n", rank, all_msg[rank].n_agents);
+                printf("%d: Indirizzi spostamenti: ", rank);
+                //printVetInt(all_msg[rank].id_agents, all_msg[rank].n_agents);
+                //printf("%d: Valori spostati: ", rank);
+                //printVetChar(all_msg[rank].vl_agents, all_msg[rank].n_agents);
+                printf("\n");
+
+                //onlineMove(data, all_msg[i], rank);
+            }
         }
     }
-
-    //send
 }
 
 void main() {
