@@ -44,6 +44,10 @@ typedef struct {
     //Generale section and displacement for al processes
     int *sec_size;
     int *sec_disp;
+
+    //Generale section and displacement for gather operation
+    int *sec_gt_size;
+    int *sec_gt_disp;
 } Data;
 typedef struct {
     int n_agents;
@@ -83,8 +87,8 @@ void sampleMat(char *mat) {
     mat[23] = 'O';
     mat[24] = 'O';
 }
-void syncProcess(int rank) {
-    sleep(rank);
+void syncProcess(unsigned int tms) {
+    usleep(tms * 1000);
 }
 
 //Matrix generation
@@ -462,7 +466,7 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
     //Free extra space
     if (all_msg[rank].n_agents == 0) free(lc_moves);
 
-    //Debug log
+    //* Debug log
     /*printf("I messaggi che manderò: \n\n");
     for (int i = 0; i < wd_size; i++) {
         if (i != rank) {
@@ -530,17 +534,20 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             all_msg[rank].vl_agents = malloc(sizeof(char) * n_moves);
 
             if (all_msg[rank].n_agents != 0) {
-                MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].id_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
-                MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].vl_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
+                MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].id_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
+                MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].vl_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
 
-                printf("%d: Numero di spostamenti: %d\n", rank, all_msg[rank].n_agents);
-                printf("%d: Indirizzi spostamenti: ", rank);
-                //printVetInt(all_msg[rank].id_agents, all_msg[rank].n_agents);
-                //printf("%d: Valori spostati: ", rank);
-                //printVetChar(all_msg[rank].vl_agents, all_msg[rank].n_agents);
-                printf("\n");
+                //* printf("%d: Numero di spostamenti: %d\n", rank, all_msg[rank].n_agents);
+                //* printf("%d: Indirizzi spostamenti: ", rank);
+                //* printVetInt(all_msg[rank].id_agents, all_msg[rank].n_agents);
+                //* printf("%d: Valori spostati: ", rank);
+                //* printVetChar(all_msg[rank].vl_agents, all_msg[rank].n_agents);
+                //* printf("\n");
 
-                //onlineMove(data, all_msg[i], rank);
+                onlineMove(data, all_msg[rank], rank);
+
+                free(all_msg[rank].id_agents);
+                free(all_msg[rank].vl_agents);
             }
         }
     }
@@ -571,10 +578,12 @@ void main() {
     //Matrix division
     data.sec_size = malloc(sizeof(int) * wd_size);
     data.sec_disp = malloc(sizeof(int) * wd_size);
+
+    //TODO vanno qui
+
     calcSizes(wd_size, data);
     data.sub_mat = malloc(sizeof(char) * data.sec_size[rank]);
     MPI_Scatterv(mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
-    if (rank == MASTER) free(mat);
     data.r_start = calcStart(rank, wd_size);
     data.r_finish = calcFinish(data, rank, wd_size);
 
@@ -613,9 +622,9 @@ void main() {
     int n_moves = findMoves(data, rank, moves);
 
     //! Debug //
-    printf("I miei valori da spostare sono: ");
-    printVetInt(moves, n_moves);
-    printf("\n");
+    //* printf("I miei valori da spostare sono: ");
+    //* printVetInt(moves, n_moves);
+    //* printf("\n");
     //! ----- //
 
     //Spostamento degli agenti
@@ -623,8 +632,10 @@ void main() {
 
     //! Debug //
     //* printf("Qui processo %d 👨‍🔧, ho ricevuto: \n", rank);
-    printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
+    //* printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
     //! ----- //
+
+    MPI_Gatherv(data.sub_mat, data.sec_size, MPI_CHAR, mat, data.sec_size, data.sec_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
     end = MPI_Wtime();
