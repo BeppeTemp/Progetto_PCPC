@@ -8,11 +8,12 @@
 ///////////////////////////////////////
 // Matrix settings
 ///////////////////////////////////////
-#define ROW 5
-#define COLUMN 5
+#define ROW 40
+#define COLUMN 40
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
+#define N_ITERACTION 500
 ///////////////////////////////////////
 // Costants
 ///////////////////////////////////////
@@ -63,34 +64,34 @@ typedef struct {
 
 // Debug functions
 void sampleMat(char *mat) {
-    mat[0] = 'X';
-    mat[1] = 'O';
-    mat[2] = 'O';
-    mat[3] = 'O';
+    mat[0] = 'O';
+    mat[1] = ' ';
+    mat[2] = 'X';
+    mat[3] = ' ';
     mat[4] = 'X';
 
-    mat[5] = 'O';
+    mat[5] = ' ';
     mat[6] = 'O';
-    mat[7] = 'O';
-    mat[8] = 'X';
+    mat[7] = ' ';
+    mat[8] = ' ';
     mat[9] = 'O';
 
     mat[10] = 'X';
-    mat[11] = ' ';
-    mat[12] = 'X';
-    mat[13] = 'X';
-    mat[14] = ' ';
+    mat[11] = 'O';
+    mat[12] = 'O';
+    mat[13] = ' ';
+    mat[14] = 'X';
 
-    mat[15] = 'O';
-    mat[16] = 'O';
+    mat[15] = ' ';
+    mat[16] = ' ';
     mat[17] = 'O';
-    mat[18] = 'O';
+    mat[18] = ' ';
     mat[19] = 'O';
 
-    mat[20] = 'X';
-    mat[21] = 'X';
+    mat[20] = ' ';
+    mat[21] = ' ';
     mat[22] = 'X';
-    mat[23] = 'O';
+    mat[23] = 'X';
     mat[24] = 'O';
 }
 void syncProcess(unsigned int tms) {
@@ -198,9 +199,10 @@ void calcSizes(int wd_size, Data data) {
     int difference = ROW % (wd_size);
 
     for (int i = 0; i < wd_size; i++) {
-        data.sec_gt_size[i] = i < difference ? (section + 1) * ROW : section * ROW;
+        data.sec_size[i] = i < difference ? (section + 1) * ROW : section * ROW;
+        data.sec_gt_size[i] = data.sec_size[i];
         data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
-        data.sec_size[i] = data.sec_gt_size[i] + ((i == 0) || (i == wd_size - 1)) ? COLUMN : COLUMN * 2;
+        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMN : COLUMN * 2;
 
         if (i == 0) {
             data.sec_disp[i] = 0;
@@ -448,6 +450,11 @@ void move(Data data, Message msg, int rank) {
             data.sub_mat[msg.id_reset[i] - data.sec_disp[rank]] = ' ';
     }
 }
+void resetLocalIndex(Data data, Message msg, int rank) {
+    for (int i = 0; i < msg.n_agents; i++)
+        if (msg.id_reset[i] >= data.sec_disp[rank] && msg.id_reset[i] < (data.sec_disp[rank] + data.sec_size[rank]))
+            data.sub_mat[msg.id_reset[i] - data.sec_disp[rank]] = ' ';
+}
 void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_Request request, MPI_Status status) {
     Message *all_msg = malloc(sizeof(Message) * wd_size);
 
@@ -509,6 +516,8 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
     int position;
     for (int i = 0; i < wd_size; i++) {
         if (i != rank) {
+            resetLocalIndex(data, all_msg[i], rank);
+
             //External moves
             position = 0;
             MPI_Pack(&all_msg[i].n_agents, 1, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
@@ -579,8 +588,8 @@ void main() {
     //Matrix generation
     if (rank == MASTER) {
         mat = malloc(ROW * COLUMN * sizeof(char));
-        //generateMat(mat);
-        sampleMat(mat);
+        generateMat(mat);
+        //sampleMat(mat);
         printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
         printMat(mat);
     }
@@ -598,75 +607,72 @@ void main() {
     data.r_start = calcStart(rank, wd_size);
     data.r_finish = calcFinish(data, rank, wd_size);
 
-    printf("start: %d\n", data.r_start);
-    printf("finish: %d\n", data.r_finish);
-
-    //Empty slot calculation
-    data.emp_slots = malloc(sizeof(int) * ROW * COLUMN);
-    data.n_empty = calcEmptySlots(data, data.emp_slots, rank, wd_size);
-    data.emp_slots = realloc(data.emp_slots, sizeof(int) * data.n_empty);
-
-    //Empty slot assignment
-    data.my_emp_slots = malloc(sizeof(int) * data.n_empty);
-    data.n_my_empty = assignEmptySlots(data, data.my_emp_slots, rank, wd_size);
-
     //Start computation
     MPI_Barrier(MPI_COMM_WORLD);
     start = MPI_Wtime();
 
-    //! Debug //
-    if (rank == 0) {
-        //* printf("Displacement: ");
-        //* printVetInt(data.sec_disp, wd_size);
-        //* printf("Section size: ");
-        //* printVetInt(data.sec_size, wd_size);
-        printf("Disp_gt: ");
-        printVetInt(data.sec_gt_disp, wd_size);
-        printf("Sec_gt: ");
-        printVetInt(data.sec_gt_size, wd_size);
-        printf("\n");
+    int iteraction = N_ITERACTION;
+    while (iteraction != 0) {
+        //Empty slot calculation
+        data.emp_slots = malloc(sizeof(int) * ROW * COLUMN);
+        data.n_empty = calcEmptySlots(data, data.emp_slots, rank, wd_size);
+        data.emp_slots = realloc(data.emp_slots, sizeof(int) * data.n_empty);
+
+        //Empty slot assignment
+        data.my_emp_slots = malloc(sizeof(int) * data.n_empty);
+        data.n_my_empty = assignEmptySlots(data, data.my_emp_slots, rank, wd_size);
+
+        //! Debug //
+        if (rank == 0) {
+            //*printf("Displacement: ");
+            //*printVetInt(data.sec_disp, wd_size);
+            //*printf("Section size: ");
+            //*printVetInt(data.sec_size, wd_size);
+            //*printf("Disp_gt: ");
+            //*printVetInt(data.sec_gt_disp, wd_size);
+            //*printf("Sec_gt: ");
+            //*printVetInt(data.sec_gt_size, wd_size);
+            //*printf("\n");
+        }
+
+        //* syncProcess(rank);
+
+        //* printf("***********************************************\n");
+        //* printf("Rank: %d\n", rank);
+        //* printf("Numero posizioni vuote assegnate: %d\n", data.n_my_empty);
+        //* printf("Le posizioni vuote assegnate sono: ");
+        //* printVetInt(data.my_emp_slots, data.n_my_empty);
+        //! ----- //
+
+        //Identificazione degli agenti da spostare
+        int *moves = malloc(sizeof(int) * data.n_my_empty);
+        int n_moves = findMoves(data, rank, moves);
+
+        //! Debug //
+        //* printf("I miei valori da spostare sono: ");
+        //* printVetInt(moves, n_moves);
+        //* printf("\n");
+        //! ----- //
+
+        //Spostamento degli agenti
+        moveAgents(data, moves, n_moves, rank, wd_size, request, status);
+
+        //! Debug //
+        //* printf("Qui processo %d 👨‍🔧, ho elaborato: \n", rank);
+        //* printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
+        //! ----- //
+
+        char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
+        int k = 0;
+        for (int i = data.r_start; i <= data.r_finish; i++) {
+            test[k] = data.sub_mat[i];
+            k++;
+        }
+
+        MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+
+        iteraction--;
     }
-
-    syncProcess(rank);
-
-    //* printf("***********************************************\n");
-    //* printf("Rank: %d\n", rank);
-    //* printf("Numero posizioni vuote assegnate: %d\n", data.n_my_empty);
-    //* printf("Le posizioni vuote assegnate sono: ");
-    //* printVetInt(data.my_emp_slots, data.n_my_empty);
-    //! ----- //
-
-    //Identificazione degli agenti da spostare
-    int *moves = malloc(sizeof(int) * data.n_my_empty);
-    int n_moves = findMoves(data, rank, moves);
-
-    //! Debug //
-    //* printf("I miei valori da spostare sono: ");
-    //* printVetInt(moves, n_moves);
-    //* printf("\n");
-    //! ----- //
-
-    //Spostamento degli agenti
-    moveAgents(data, moves, n_moves, rank, wd_size, request, status);
-
-    //! Debug //
-    //* printf("Qui processo %d 👨‍🔧, ho elaborato: \n", rank);
-    //* printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
-    //! ----- //
-
-    for (int i = data.r_start; i < data.r_finish; i++) {
-        printf("%c ,", data.sub_mat[i]);
-    }
-
-    //* char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
-    //* int k = 0;
-    //* for (int i = data.r_start; i < data.r_finish; i++) {
-    //*     printf("value: %c\n", data.sub_mat[i]);
-    //*     test[k] = data.sub_mat[i];
-    //*     k++;
-    //* }
-
-    //MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
     end = MPI_Wtime();
