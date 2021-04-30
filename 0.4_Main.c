@@ -50,9 +50,15 @@ typedef struct {
     int *sec_gt_disp;
 } Data;
 typedef struct {
+    //Numero di celle da aggiornare
     int n_agents;
+
+    //Index delle celle da aggiornare e valore
     int *id_agents;
     char *vl_agents;
+
+    //index delle celle da azzerare
+    int *id_reset;
 } Message;
 
 // Debug functions
@@ -192,9 +198,9 @@ void calcSizes(int wd_size, Data data) {
     int difference = ROW % (wd_size);
 
     for (int i = 0; i < wd_size; i++) {
-        data.sec_size[i] = i < difference ? (section + 1) * ROW : section * ROW;
-        //printf("Real SS: %d\n", data[i].sec_size / ROW);
-        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMN : COLUMN * 2;
+        data.sec_gt_size[i] = i < difference ? (section + 1) * ROW : section * ROW;
+        data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
+        data.sec_size[i] = data.sec_gt_size[i] + ((i == 0) || (i == wd_size - 1)) ? COLUMN : COLUMN * 2;
 
         if (i == 0) {
             data.sec_disp[i] = 0;
@@ -429,26 +435,28 @@ int calcMembership(Data data, int rank, int emp_pos, int wd_size) {
 
     return (emp_pos >= start && emp_pos < finish);
 }
-void offlineMove(Data data, Message msg, int *lc_reset, int rank) {
+void move(Data data, Message msg, int rank) {
     for (int i = 0; i < msg.n_agents; i++) {
         data.sub_mat[msg.id_agents[i] - data.sec_disp[rank]] = msg.vl_agents[i];
-        data.sub_mat[lc_reset[i]] = ' ';
-    }
-}
-void onlineMove(Data data, Message msg, int rank) {
-    for (int i = 0; i < msg.n_agents; i++) {
-        data.sub_mat[msg.id_agents[i] - data.sec_disp[rank]] = msg.vl_agents[i];
+
+        //* printf("rank: %d\n", rank);
+        //* printf("Indice reset: %d\n", msg.id_reset[i]);
+        //* printf("Indice convertito: %d\n", msg.id_reset[i] - data.sec_disp[rank]);
+        //* printf("\n");
+
+        if (msg.id_reset[i] >= data.sec_disp[rank] && msg.id_reset[i] < (data.sec_disp[rank] + data.sec_size[rank]))
+            data.sub_mat[msg.id_reset[i] - data.sec_disp[rank]] = ' ';
     }
 }
 void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_Request request, MPI_Status status) {
     Message *all_msg = malloc(sizeof(Message) * wd_size);
-    int *lc_moves = malloc(sizeof(int) * n_moves);
 
     //Messages inizialization
     for (int i = 0; i < wd_size; i++) {
         all_msg[i].n_agents = 0;
         all_msg[i].id_agents = malloc(sizeof(int) * n_moves);
         all_msg[i].vl_agents = malloc(sizeof(char) * n_moves);
+        all_msg[i].id_reset = malloc(sizeof(int) * n_moves);
     }
 
     //Messages creation
@@ -457,14 +465,11 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             if (calcMembership(data, i, data.my_emp_slots[j], wd_size)) {
                 all_msg[i].id_agents[all_msg[i].n_agents] = data.my_emp_slots[j];
                 all_msg[i].vl_agents[all_msg[i].n_agents] = data.sub_mat[moves[j] - data.sec_disp[rank]];
-                if (i == rank) lc_moves[all_msg[i].n_agents] = moves[j] - data.sec_disp[rank];
+                all_msg[i].id_reset[all_msg[i].n_agents] = moves[j];
                 all_msg[i].n_agents++;
             }
         }
     }
-
-    //Free extra space
-    if (all_msg[rank].n_agents == 0) free(lc_moves);
 
     //* Debug log
     /*printf("I messaggi che manderò: \n\n");
@@ -477,6 +482,8 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
                 printVetInt(all_msg[i].id_agents, all_msg[i].n_agents);
                 printf("Valori da scrivere: ");
                 printVetChar(all_msg[i].vl_agents, all_msg[i].n_agents);
+                printf("Indici da azzerare: ");
+                printVetInt(all_msg[i].id_reset, all_msg[i].n_agents);
             } else {
                 printf("Al rank %d niente.\n", i);
             }
@@ -489,7 +496,7 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
                 printf("Valori da spostare: ");
                 printVetChar(all_msg[i].vl_agents, all_msg[i].n_agents);
                 printf("Indici da azzerare: ");
-                printVetInt(lc_moves, all_msg[i].n_agents);
+                printVetInt(all_msg[i].id_reset, all_msg[i].n_agents);
             } else {
                 printf("A me stesso niente.\n");
             }
@@ -507,21 +514,19 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             MPI_Pack(&all_msg[i].n_agents, 1, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
             MPI_Pack(all_msg[i].id_agents, all_msg[i].n_agents, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
             MPI_Pack(all_msg[i].vl_agents, all_msg[i].n_agents, MPI_CHAR, message, BUFSIZ, &position, MPI_COMM_WORLD);
+            MPI_Pack(all_msg[i].id_reset, all_msg[i].n_agents, MPI_INT, message, BUFSIZ, &position, MPI_COMM_WORLD);
 
             MPI_Isend(message, BUFSIZ, MPI_PACKED, i, 0, MPI_COMM_WORLD, &request);
-
-            free(all_msg[i].id_agents);
-            free(all_msg[i].vl_agents);
         } else {
             //Internal moves
             if (all_msg[i].n_agents != 0) {
-                offlineMove(data, all_msg[i], lc_moves, rank);
-
-                free(all_msg[i].id_agents);
-                free(all_msg[i].vl_agents);
-                free(lc_moves);
+                move(data, all_msg[i], rank);
             }
         }
+
+        free(all_msg[i].id_agents);
+        free(all_msg[i].vl_agents);
+        free(all_msg[i].id_reset);
     }
 
     for (int i = 0; i < wd_size; i++) {
@@ -532,22 +537,27 @@ void moveAgents(Data data, int *moves, int n_moves, int rank, int wd_size, MPI_R
             MPI_Unpack(message, BUFSIZ, &position, &all_msg[rank].n_agents, 1, MPI_INT, MPI_COMM_WORLD);
             all_msg[rank].id_agents = malloc(sizeof(int) * n_moves);
             all_msg[rank].vl_agents = malloc(sizeof(char) * n_moves);
+            all_msg[rank].id_reset = malloc(sizeof(int) * n_moves);
 
             if (all_msg[rank].n_agents != 0) {
                 MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].id_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
-                MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].vl_agents, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
+                MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].vl_agents, all_msg[rank].n_agents, MPI_CHAR, MPI_COMM_WORLD);
+                MPI_Unpack(message, BUFSIZ, &position, all_msg[rank].id_reset, all_msg[rank].n_agents, MPI_INT, MPI_COMM_WORLD);
 
                 //* printf("%d: Numero di spostamenti: %d\n", rank, all_msg[rank].n_agents);
                 //* printf("%d: Indirizzi spostamenti: ", rank);
                 //* printVetInt(all_msg[rank].id_agents, all_msg[rank].n_agents);
                 //* printf("%d: Valori spostati: ", rank);
                 //* printVetChar(all_msg[rank].vl_agents, all_msg[rank].n_agents);
+                //* printf("%d: Valori da resettare: ", rank);
+                //* printVetInt(all_msg[rank].id_reset, all_msg[rank].n_agents);
                 //* printf("\n");
 
-                onlineMove(data, all_msg[rank], rank);
+                move(data, all_msg[rank], rank);
 
                 free(all_msg[rank].id_agents);
                 free(all_msg[rank].vl_agents);
+                free(all_msg[rank].id_reset);
             }
         }
     }
@@ -578,14 +588,18 @@ void main() {
     //Matrix division
     data.sec_size = malloc(sizeof(int) * wd_size);
     data.sec_disp = malloc(sizeof(int) * wd_size);
-
-    //TODO vanno qui
-
+    data.sec_gt_size = malloc(sizeof(int) * wd_size);
+    data.sec_gt_disp = malloc(sizeof(int) * wd_size);
     calcSizes(wd_size, data);
     data.sub_mat = malloc(sizeof(char) * data.sec_size[rank]);
     MPI_Scatterv(mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
+
+    //Calcolo start and stop
     data.r_start = calcStart(rank, wd_size);
     data.r_finish = calcFinish(data, rank, wd_size);
+
+    printf("start: %d\n", data.r_start);
+    printf("finish: %d\n", data.r_finish);
 
     //Empty slot calculation
     data.emp_slots = malloc(sizeof(int) * ROW * COLUMN);
@@ -602,19 +616,24 @@ void main() {
 
     //! Debug //
     if (rank == 0) {
-        printf("Displacement: ");
-        printVetInt(data.sec_disp, wd_size);
-        printf("Section size: ");
-        printVetInt(data.sec_size, wd_size);
+        //* printf("Displacement: ");
+        //* printVetInt(data.sec_disp, wd_size);
+        //* printf("Section size: ");
+        //* printVetInt(data.sec_size, wd_size);
+        printf("Disp_gt: ");
+        printVetInt(data.sec_gt_disp, wd_size);
+        printf("Sec_gt: ");
+        printVetInt(data.sec_gt_size, wd_size);
         printf("\n");
     }
+
     syncProcess(rank);
 
-    printf("***********************************************\n");
-    printf("Rank: %d\n", rank);
-    printf("Numero posizioni vuote assegnate: %d\n", data.n_my_empty);
-    printf("Le posizioni vuote assegnate sono: ");
-    printVetInt(data.my_emp_slots, data.n_my_empty);
+    //* printf("***********************************************\n");
+    //* printf("Rank: %d\n", rank);
+    //* printf("Numero posizioni vuote assegnate: %d\n", data.n_my_empty);
+    //* printf("Le posizioni vuote assegnate sono: ");
+    //* printVetInt(data.my_emp_slots, data.n_my_empty);
     //! ----- //
 
     //Identificazione degli agenti da spostare
@@ -631,15 +650,32 @@ void main() {
     moveAgents(data, moves, n_moves, rank, wd_size, request, status);
 
     //! Debug //
-    printf("Qui processo %d 👨‍🔧, ho ricevuto: \n", rank);
-    printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
+    //* printf("Qui processo %d 👨‍🔧, ho elaborato: \n", rank);
+    //* printSubMat(wd_size, data.sub_mat, data.sec_size[rank] / COLUMN, rank);
     //! ----- //
 
-    //MPI_Gatherv(data.sub_mat, data.sec_size, MPI_CHAR, mat, data.sec_size, data.sec_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    for (int i = data.r_start; i < data.r_finish; i++) {
+        printf("%c ,", data.sub_mat[i]);
+    }
+
+    //* char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
+    //* int k = 0;
+    //* for (int i = data.r_start; i < data.r_finish; i++) {
+    //*     printf("value: %c\n", data.sub_mat[i]);
+    //*     test[k] = data.sub_mat[i];
+    //*     k++;
+    //* }
+
+    //MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
     end = MPI_Wtime();
     //Finish computation
+
+    if (rank == MASTER) {
+        printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+        printMat(mat);
+    }
 
     MPI_Finalize();
 
@@ -653,4 +689,3 @@ void main() {
 }
 
 //TODO Gestione pochi processi
-//TODO Azzera le celle nel processo 2
