@@ -13,8 +13,8 @@
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 5000
-#define ASSIGN_SEED 1
+#define N_ITERACTION 200
+#define ASSIGN_SEED 117
 ///////////////////////////////////////
 // Costants
 ///////////////////////////////////////
