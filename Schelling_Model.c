@@ -8,12 +8,11 @@
 ///////////////////////////////////////
 // Impostazioni della Matrice
 ///////////////////////////////////////
-#define ROW 5
-#define COLUMN 5
+#define SIZE 50
 #define O_PERCENTAGE 30
 #define X_PERCENTAGE 30
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 3
+#define N_ITERACTION 1000
 #define ASSIGN_SEED 117
 ///////////////////////////////////////
 // Costants
@@ -55,35 +54,43 @@ typedef struct {
 
 // Debug functions
 void sampleMat(char *mat) {
-    mat[0] = ' ';
-    mat[1] = ' ';
+    mat[0] = 'X';
+    mat[1] = 'O';
     mat[2] = 'X';
     mat[3] = 'X';
-    mat[4] = ' ';
+    mat[4] = 'X';
 
-    mat[5] = 'X';
-    mat[6] = ' ';
-    mat[7] = 'X';
+    mat[5] = 'O';
+    mat[6] = 'X';
+    mat[7] = 'O';
     mat[8] = 'X';
-    mat[9] = 'O';
+    mat[9] = ' ';
 
-    mat[10] = ' ';
-    mat[11] = ' ';
+    mat[10] = 'O';
+    mat[11] = 'X';
     mat[12] = 'X';
     mat[13] = 'X';
     mat[14] = ' ';
 
     mat[15] = ' ';
     mat[16] = 'X';
-    mat[17] = ' ';
-    mat[18] = 'O';
-    mat[19] = 'X';
+    mat[17] = 'X';
+    mat[18] = ' ';
+    mat[19] = ' ';
 
     mat[20] = ' ';
     mat[21] = ' ';
-    mat[22] = 'X';
-    mat[23] = ' ';
-    mat[24] = 'O';
+    mat[22] = ' ';
+    mat[23] = 'O';
+    mat[24] = ' ';
+}
+void syncProcess(unsigned int rank) {
+    usleep(rank * 500);
+}
+void saveMatrixToFile(char *mat) {
+    FILE *file = fopen("Matrix.txt", "w");
+    int results = fputs(mat, file);
+    fclose(file);
 }
 
 //Matrix generation
@@ -98,7 +105,7 @@ char randomValue() {
 }
 void generateMat(char *mat) {
     srand(time(NULL) + MASTER);
-    for (int i = 0; i < (ROW * COLUMN); i++)
+    for (int i = 0; i < (SIZE * SIZE); i++)
         mat[i] = randomValue();
 }
 
@@ -142,23 +149,23 @@ void printRows(char vet[], int start, int len, int is_Ylw) {
         for (int i = start; i < len; i++) {
             printf("|");
             printCharYellow(vet[i]);
-            if (((i + 1) % (ROW) == 0) && (i != 0))
+            if (((i + 1) % (SIZE) == 0) && (i != 0))
                 printf("|\n");
         }
     else
         for (int i = start; i < len; i++) {
             printf("|");
             printChar(vet[i]);
-            if (((i + 1) % (ROW) == 0) && (i != 0))
+            if (((i + 1) % (SIZE) == 0) && (i != 0))
                 printf("|\n");
         }
 }
 void printMat(char *mat) {
     printf("\n");
-    for (int i = 0; i < (ROW * COLUMN); i++) {
+    for (int i = 0; i < (SIZE * SIZE); i++) {
         printf("|");
         printChar(mat[i]);
-        if (((i + 1) % (ROW) == 0) && (i != 0))
+        if (((i + 1) % (SIZE) == 0) && (i != 0))
             printf("|\n");
     }
     printf("\n");
@@ -166,66 +173,66 @@ void printMat(char *mat) {
 void printSubMat(int wd_size, char *mat, int row, int rank) {
     printf("\n");
     if (rank == 0) {
-        printRows(mat, 0, (row - 1) * COLUMN, 0);
-        printRows(mat, (row * COLUMN) - COLUMN, row * COLUMN, 1);
+        printRows(mat, 0, (row - 1) * SIZE, 0);
+        printRows(mat, (row * SIZE) - SIZE, row * SIZE, 1);
         printf("\n");
     } else if (rank == wd_size - 1) {
-        printRows(mat, 0, COLUMN, 1);
-        printRows(mat, COLUMN, row * COLUMN, 0);
+        printRows(mat, 0, SIZE, 1);
+        printRows(mat, SIZE, row * SIZE, 0);
         printf("\n");
     } else {
-        printRows(mat, 0, COLUMN, 1);
-        printRows(mat, COLUMN, (row * COLUMN) - COLUMN, 0);
-        printRows(mat, (row * COLUMN) - COLUMN, row * COLUMN, 1);
+        printRows(mat, 0, SIZE, 1);
+        printRows(mat, SIZE, (row * SIZE) - SIZE, 0);
+        printRows(mat, (row * SIZE) - SIZE, row * SIZE, 1);
         printf("\n");
     }
 }
 
 //Divide matrix in n row per process
 void calcSizes(int wd_size, Data data) {
-    int section = ROW / (wd_size);
-    int difference = ROW % (wd_size);
+    int section = SIZE / (wd_size);
+    int difference = SIZE % (wd_size);
 
     for (int i = 0; i < wd_size; i++) {
-        data.sec_size[i] = i < difference ? (section + 1) * ROW : section * ROW;
+        data.sec_size[i] = i < difference ? (section + 1) * SIZE : section * SIZE;
         data.sec_gt_size[i] = data.sec_size[i];
         data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
-        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMN : COLUMN * 2;
+        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? SIZE : SIZE * 2;
 
         if (i == 0) {
             data.sec_disp[i] = 0;
         } else if (i == wd_size - 1)
-            data.sec_disp[i] = (ROW * COLUMN) - data.sec_size[i];
+            data.sec_disp[i] = (SIZE * SIZE) - data.sec_size[i];
         else {
-            data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (COLUMN * 2);
+            data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (SIZE * 2);
         }
     }
     //! Debug //
-    /*tf("Sezioni generate: ");
-    printVetInt(sec_size, wd_size);
-    printf("Displacements generati: ");
-    printVetInt(displacement, wd_size);*/
+    //* printf("Sezioni generate: ");
+    //* printVetInt(data.sec_size, wd_size);
+    //* printf("Displacements generati: ");
+    //* printVetInt(data.sec_disp, wd_size);
     //! ----- //
 }
 int calcStart(int rank, int wd_size) {
     if (rank == 0)
         return 0;
     else
-        return COLUMN;
+        return SIZE;
 }
 int calcFinish(Data data, int rank, int wd_size) {
     if (rank == 0)
-        return data.sec_size[rank] - COLUMN - 1;
+        return data.sec_size[rank] - SIZE - 1;
     else if (rank == wd_size - 1)
         return data.sec_size[rank] - 1;
     else
-        return data.sec_size[rank] - COLUMN - 1;
+        return data.sec_size[rank] - SIZE - 1;
 }
 
 //Calculate the degree of satisfaction of a single agent
 void convertIndex(int id, int *row_index, int *col_index) {
-    *row_index = id / COLUMN;
-    *col_index = id % COLUMN;
+    *row_index = id / SIZE;
+    *col_index = id % SIZE;
 }
 int isMyKind(int my_index, int x_index, Data data) {
     return data.sub_mat[my_index] == data.sub_mat[x_index];
@@ -236,26 +243,26 @@ void calcSatCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
         //Upper left corner
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN), data);
-            *my_kynd += isMyKind(id, (id + COLUMN) + 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE), data);
+            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             break;
         //Upper right corner
         case 1:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN), data);
-            *my_kynd += isMyKind(id, (id + COLUMN) - 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE), data);
+            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
         //Lower left corner
         case 2:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN), data);
-            *my_kynd += isMyKind(id, (id - COLUMN) + 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE), data);
+            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
         //Lower right corner
         case 3:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN), data);
-            *my_kynd += isMyKind(id, (id - COLUMN) - 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE), data);
+            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
             break;
     }
 }
@@ -266,33 +273,33 @@ void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN), data);
-            *my_kynd += isMyKind(id, (id + COLUMN) + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN) - 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE), data);
+            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
         //Left edge
         case 1:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN), data);
-            *my_kynd += isMyKind(id, (id - COLUMN), data);
-            *my_kynd += isMyKind(id, (id + COLUMN) + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN) + 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE), data);
+            *my_kynd += isMyKind(id, (id - SIZE), data);
+            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
         //Right edge
         case 2:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMN), data);
-            *my_kynd += isMyKind(id, (id - COLUMN), data);
-            *my_kynd += isMyKind(id, (id + COLUMN) - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN) - 1, data);
+            *my_kynd += isMyKind(id, (id + SIZE), data);
+            *my_kynd += isMyKind(id, (id - SIZE), data);
+            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
             break;
         //Lower edge
         case 3:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN), data);
-            *my_kynd += isMyKind(id, (id - COLUMN) + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMN) - 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE), data);
+            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
             break;
     }
 }
@@ -300,17 +307,17 @@ void calcSatCenter(int id, Data data, int *neigh, int *my_kynd) {
     *neigh += 8;
     *my_kynd += isMyKind(id, id + 1, data);
     *my_kynd += isMyKind(id, id - 1, data);
-    *my_kynd += isMyKind(id, (id - COLUMN), data);
-    *my_kynd += isMyKind(id, (id + COLUMN), data);
-    *my_kynd += isMyKind(id, (id - COLUMN) + 1, data);
-    *my_kynd += isMyKind(id, (id - COLUMN) - 1, data);
-    *my_kynd += isMyKind(id, (id + COLUMN) + 1, data);
-    *my_kynd += isMyKind(id, (id + COLUMN) - 1, data);
+    *my_kynd += isMyKind(id, (id - SIZE), data);
+    *my_kynd += isMyKind(id, (id + SIZE), data);
+    *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
+    *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
+    *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
+    *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
 }
 int calcSat(int id, Data data, int rank) {
     int neigh = 0;
     int my_kynd = 0;
-    int row = data.sec_size[rank] / COLUMN;
+    int row = data.sec_size[rank] / SIZE;
 
     int row_index;
     int col_index;
@@ -320,7 +327,7 @@ int calcSat(int id, Data data, int rank) {
     if (row_index == 0)
         if (col_index == 0)
             calcSatCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
-        else if (col_index == COLUMN - 1)
+        else if (col_index == SIZE - 1)
             calcSatCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
         else
             calcSatEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
@@ -328,7 +335,7 @@ int calcSat(int id, Data data, int rank) {
     else if (row_index == row - 1)
         if (col_index == 0)
             calcSatCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
-        else if (col_index == COLUMN - 1)
+        else if (col_index == SIZE - 1)
             calcSatCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
         else
             calcSatEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
@@ -336,7 +343,7 @@ int calcSat(int id, Data data, int rank) {
     else if (col_index == 0 && row_index > 0 && row_index < row - 1)
         calcSatEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
 
-    else if (col_index == COLUMN - 1 && row_index > 0 && row_index < row)
+    else if (col_index == SIZE - 1 && row_index > 0 && row_index < row)
         calcSatEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
     else
         calcSatCenter(id, data, &neigh, &my_kynd);  //Center
@@ -375,7 +382,7 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     int vet_disp[wd_size];
 
     //Individuazione degli slot vuoti
-    int vet_emp[data.r_finish - data.r_start];
+    int *vet_emp = malloc(sizeof(int) * data.r_finish - data.r_start);
     int n_my_emp = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] == ' ') {
@@ -391,13 +398,15 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
         vet_disp[i] = i == 0 ? 0 : vet_disp[i - 1] + vet_siz[i - 1];
     }
 
-    int emp_slots[empty_tot];
+    int *emp_slots = malloc(sizeof(int) * empty_tot);
 
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
+    free(vet_emp);
 
     //Randomizzazione dell'array
-    for (int i = 0; i < rand() % 10; i++)
+    for (int i = 0; i < wd_size; i++) {
         shuffle(emp_slots, empty_tot);
+    }
 
     //Assegnazione degli slot vuoti
     data.n_my_empty = empty_tot / wd_size;
@@ -412,8 +421,8 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
 }
 
 //Move operation
-int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
-    int k = 0, is_over = 0;
+void findMoves(Data data, Move *my_moves, int rank) {
+    int k = 0;
     int n_moves = data.n_my_empty;
 
     //Identificazione agenti da spostare
@@ -423,31 +432,22 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
                 my_moves[k].id_agent = data.my_emp_slots[k];
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
-                is_over++;
-                if (n_moves-- == 0) break;
-                k++;
-            } else {
-                my_moves[k].id_agent = -1;
-                my_moves[k].id_reset = -1;
-                my_moves[k].vl_agent = 'n';
+                // printf("%dk: id %d, vl %c, rs %d \n", rank, my_moves[k].id_agent, my_moves[k].vl_agent, my_moves[k].id_reset);
                 if (n_moves-- == 0) break;
                 k++;
             }
     }
 
-    for (int i = 0; i < data.n_my_empty; i++) {
-        printf("i: %d\n", i);
-                        printf("reset: %d\n", my_moves[i].id_reset);
-        printf("%d, id %d, vl %c, rs %d \n", rank, my_moves[i].id_agent, my_moves[i].vl_agent, my_moves[i].id_reset);
+    for (int i = 0; i < n_moves; i++) {
+        my_moves[k].id_agent = -1;
+        my_moves[k].id_reset = -1;
+        my_moves[k].vl_agent = 'n';
+        k++;
     }
-    printf("\n");
 
-    int tot_over[wd_size];
-    MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
-    is_over = 0;
-    for (int i = 0; i < wd_size; i++) is_over += tot_over[i];
-
-    return (is_over == 0);
+    //* for (int i = 0; i < data.n_my_empty; i++) {
+    //*     printf("%di: id %d, vl %c, rs %d \n", rank, my_moves[i].id_agent, my_moves[i].vl_agent, my_moves[i].id_reset);
+    //* }
 }
 int calcMembership(Data data, int rank, int index) {
     int start = data.sec_disp[rank];
@@ -455,7 +455,7 @@ int calcMembership(Data data, int rank, int index) {
 
     return (index >= start && index < finish);
 }
-void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
+void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, int wd_size, int rank, int n_itc) {
     int sec_size[wd_size];
     int sec_disp[wd_size];
 
@@ -464,7 +464,6 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
         sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
     }
 
-    Move moves[data.n_my_empty * wd_size];
     MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
 
     for (int i = 0; i < data.n_my_empty * wd_size; i++) {
@@ -491,18 +490,17 @@ int isOver(int n_moves, int wd_size, int rank) {
     return sum == 0;
 }
 void gatherResult(Data data, int rank, char *mat) {
-    char section[data.sec_gt_size[rank]];
+    char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
     int k = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
-        section[k] = data.sub_mat[i];
+        test[k] = data.sub_mat[i];
         k++;
     }
-
-    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    free(test);
 }
 
 void main() {
-    //Definizione delle variabili
     int n_itc = N_ITERACTION;
     char *mat;
     Data data;
@@ -524,12 +522,13 @@ void main() {
     MPI_Type_create_struct(2, blockcounts, offsets, oldtypes, &move_data_type);
     MPI_Type_commit(&move_data_type);
 
-    if (wd_size <= ROW) {
+    if (wd_size <= SIZE) {
         //Matrix generation
         if (rank == MASTER) {
-            mat = malloc(ROW * COLUMN * sizeof(char));
-            //generateMat(mat);
-            sampleMat(mat);
+            mat = malloc(SIZE * SIZE * sizeof(char));
+            generateMat(mat);
+            //sampleMat(mat);
+            saveMatrixToFile(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
             printMat(mat);
         }
@@ -547,7 +546,8 @@ void main() {
         data.r_start = calcStart(rank, wd_size);
         data.r_finish = calcFinish(data, rank, wd_size);
 
-        data.my_emp_slots = malloc(sizeof(int) * ROW * COLUMN);
+        data.my_emp_slots = malloc(sizeof(int) * SIZE * SIZE);
+        Move *moves = malloc(sizeof(Move));
 
         //Start computation
         MPI_Barrier(MPI_COMM_WORLD);
@@ -559,19 +559,19 @@ void main() {
 
             if (n_itc == N_ITERACTION) {
                 data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
+                moves = realloc(moves, sizeof(Move) * data.n_my_empty * wd_size);
             }
 
             //Identificazione degli agenti da spostare
             Move my_moves[data.n_my_empty];
-            if (findMoves(data, my_moves, rank, wd_size)) break;
+            findMoves(data, my_moves, rank);
 
             //Move agent
-            move(data, my_moves, move_data_type, wd_size, rank);
+            move(data, my_moves, moves, move_data_type, wd_size, rank, n_itc);
 
             n_itc--;
         }
 
-        //Creazione della matrice dei risultati
         gatherResult(data, rank, mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -581,16 +581,20 @@ void main() {
 
     MPI_Finalize();
 
-    //Visualizzazione risultati
-    if (wd_size <= ROW) {
+    if (wd_size <= SIZE) {
         if (rank == MASTER) {
             printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
             printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
-
-            free(mat);
         }
+
+        free(data.sec_size);
+        free(data.sec_disp);
+        free(data.sec_gt_size);
+        free(data.sec_gt_disp);
+        free(data.sub_mat);
+        free(data.my_emp_slots);
     } else if (rank == MASTER)
         printf("Qui Master 🧑‍🎓, computazione impossibile, numero di slave eccessivo. \n");
 }

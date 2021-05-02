@@ -8,10 +8,10 @@
 ///////////////////////////////////////
 // Impostazioni della Matrice
 ///////////////////////////////////////
-#define ROW 150
-#define COLUMN 150
-#define O_PERCENTAGE 33
-#define X_PERCENTAGE 33
+#define ROW 5
+#define COLUMN 5
+#define O_PERCENTAGE 10
+#define X_PERCENTAGE 10
 #define SAT_THRESHOLD 33.3
 #define N_ITERACTION 500
 #define ASSIGN_SEED 117
