@@ -8,12 +8,12 @@
 ///////////////////////////////////////
 // Impostazioni della Matrice
 ///////////////////////////////////////
-#define ROW 50
-#define COLUMN 50
+#define ROW 150
+#define COLUMN 150
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 200
+#define N_ITERACTION 500
 #define ASSIGN_SEED 117
 ///////////////////////////////////////
 // Costants
@@ -208,6 +208,11 @@ void sampleMat1010(char *mat) {
 }
 void syncProcess(unsigned int rank) {
     usleep(rank * 100);
+}
+void saveMatrixToFile(char *mat) {
+    FILE *file = fopen("Matrix.txt", "w");
+    int results = fputs(mat, file);
+    fclose(file);
 }
 
 //Matrix generation
@@ -706,6 +711,16 @@ int isOver(int n_moves, int wd_size, int rank) {
 
     return sum == 0;
 }
+void gatherResult(Data data, int rank, char *mat) {
+    char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
+    int k = 0;
+    for (int i = data.r_start; i <= data.r_finish; i++) {
+        test[k] = data.sub_mat[i];
+        k++;
+    }
+    MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    free(test);
+}
 
 void main() {
     int n_itc = N_ITERACTION;
@@ -726,6 +741,7 @@ void main() {
         if (rank == MASTER) {
             mat = malloc(ROW * COLUMN * sizeof(char));
             generateMat(mat);
+            saveMatrixToFile(mat);
             //sampleMat55(mat);
             //sampleMat1010(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
@@ -804,15 +820,7 @@ void main() {
             n_itc--;
         }
 
-        //TODO crea una funzione
-        char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
-        int k = 0;
-        for (int i = data.r_start; i <= data.r_finish; i++) {
-            test[k] = data.sub_mat[i];
-            k++;
-        }
-        MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
-        free(test);
+        gatherResult(data, rank, mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
