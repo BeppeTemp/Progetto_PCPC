@@ -8,12 +8,12 @@
 ///////////////////////////////////////
 // Impostazioni della Matrice
 ///////////////////////////////////////
-#define ROW 95
-#define COLUMN 95
-#define O_PERCENTAGE 33
-#define X_PERCENTAGE 33
+#define ROW 5
+#define COLUMN 5
+#define O_PERCENTAGE 30
+#define X_PERCENTAGE 30
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 50000
+#define N_ITERACTION 3
 #define ASSIGN_SEED 117
 ///////////////////////////////////////
 // Costants
@@ -55,43 +55,35 @@ typedef struct {
 
 // Debug functions
 void sampleMat(char *mat) {
-    mat[0] = 'O';
-    mat[1] = 'O';
-    mat[2] = 'O';
-    mat[3] = 'O';
-    mat[4] = 'O';
+    mat[0] = ' ';
+    mat[1] = ' ';
+    mat[2] = 'X';
+    mat[3] = 'X';
+    mat[4] = ' ';
 
-    mat[5] = ' ';
-    mat[6] = 'O';
-    mat[7] = 'O';
-    mat[8] = ' ';
+    mat[5] = 'X';
+    mat[6] = ' ';
+    mat[7] = 'X';
+    mat[8] = 'X';
     mat[9] = 'O';
 
-    mat[10] = 'X';
+    mat[10] = ' ';
     mat[11] = ' ';
-    mat[12] = 'O';
+    mat[12] = 'X';
     mat[13] = 'X';
-    mat[14] = 'O';
+    mat[14] = ' ';
 
-    mat[15] = 'O';
-    mat[16] = ' ';
-    mat[17] = 'X';
-    mat[18] = ' ';
+    mat[15] = ' ';
+    mat[16] = 'X';
+    mat[17] = ' ';
+    mat[18] = 'O';
     mat[19] = 'X';
 
-    mat[20] = 'X';
+    mat[20] = ' ';
     mat[21] = ' ';
-    mat[22] = ' ';
+    mat[22] = 'X';
     mat[23] = ' ';
     mat[24] = 'O';
-}
-void syncProcess(unsigned int rank) {
-    usleep(rank * 500);
-}
-void saveMatrixToFile(char *mat) {
-    FILE *file = fopen("Matrix.txt", "w");
-    int results = fputs(mat, file);
-    fclose(file);
 }
 
 //Matrix generation
@@ -383,7 +375,7 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     int vet_disp[wd_size];
 
     //Individuazione degli slot vuoti
-    int *vet_emp = malloc(sizeof(int) * data.r_finish - data.r_start);
+    int vet_emp[data.r_finish - data.r_start];
     int n_my_emp = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] == ' ') {
@@ -399,15 +391,13 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
         vet_disp[i] = i == 0 ? 0 : vet_disp[i - 1] + vet_siz[i - 1];
     }
 
-    int *emp_slots = malloc(sizeof(int) * empty_tot);
+    int emp_slots[empty_tot];
 
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
-    free(vet_emp);
 
     //Randomizzazione dell'array
-    for (int i = 0; i < wd_size; i++) {
+    for (int i = 0; i < rand() % 10; i++)
         shuffle(emp_slots, empty_tot);
-    }
 
     //Assegnazione degli slot vuoti
     data.n_my_empty = empty_tot / wd_size;
@@ -422,8 +412,8 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
 }
 
 //Move operation
-void findMoves(Data data, Move *my_moves, int rank) {
-    int k = 0;
+int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
+    int k = 0, is_over = 0;
     int n_moves = data.n_my_empty;
 
     //Identificazione agenti da spostare
@@ -433,6 +423,7 @@ void findMoves(Data data, Move *my_moves, int rank) {
                 my_moves[k].id_agent = data.my_emp_slots[k];
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
+                is_over++;
                 if (n_moves-- == 0) break;
                 k++;
             } else {
@@ -443,6 +434,20 @@ void findMoves(Data data, Move *my_moves, int rank) {
                 k++;
             }
     }
+
+    for (int i = 0; i < data.n_my_empty; i++) {
+        printf("i: %d\n", i);
+                        printf("reset: %d\n", my_moves[i].id_reset);
+        printf("%d, id %d, vl %c, rs %d \n", rank, my_moves[i].id_agent, my_moves[i].vl_agent, my_moves[i].id_reset);
+    }
+    printf("\n");
+
+    int tot_over[wd_size];
+    MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
+    is_over = 0;
+    for (int i = 0; i < wd_size; i++) is_over += tot_over[i];
+
+    return (is_over == 0);
 }
 int calcMembership(Data data, int rank, int index) {
     int start = data.sec_disp[rank];
@@ -450,7 +455,7 @@ int calcMembership(Data data, int rank, int index) {
 
     return (index >= start && index < finish);
 }
-void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, int wd_size, int rank, int n_itc) {
+void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
     int sec_size[wd_size];
     int sec_disp[wd_size];
 
@@ -459,6 +464,7 @@ void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, i
         sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
     }
 
+    Move moves[data.n_my_empty * wd_size];
     MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
 
     for (int i = 0; i < data.n_my_empty * wd_size; i++) {
@@ -466,7 +472,7 @@ void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, i
             if (calcMembership(data, rank, moves[i].id_agent)) {
                 data.sub_mat[moves[i].id_agent - data.sec_disp[rank]] = moves[i].vl_agent;
             }
-            if (calcMembership(data, rank, moves[i].id_reset)) {                
+            if (calcMembership(data, rank, moves[i].id_reset)) {
                 data.sub_mat[moves[i].id_reset - data.sec_disp[rank]] = ' ';
             }
         }
@@ -485,17 +491,18 @@ int isOver(int n_moves, int wd_size, int rank) {
     return sum == 0;
 }
 void gatherResult(Data data, int rank, char *mat) {
-    char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
+    char section[data.sec_gt_size[rank]];
     int k = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
-        test[k] = data.sub_mat[i];
+        section[k] = data.sub_mat[i];
         k++;
     }
-    MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
-    free(test);
+
+    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 }
 
 void main() {
+    //Definizione delle variabili
     int n_itc = N_ITERACTION;
     char *mat;
     Data data;
@@ -521,9 +528,8 @@ void main() {
         //Matrix generation
         if (rank == MASTER) {
             mat = malloc(ROW * COLUMN * sizeof(char));
-            generateMat(mat);
-            //sampleMat(mat);
-            saveMatrixToFile(mat);
+            //generateMat(mat);
+            sampleMat(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
             printMat(mat);
         }
@@ -542,7 +548,6 @@ void main() {
         data.r_finish = calcFinish(data, rank, wd_size);
 
         data.my_emp_slots = malloc(sizeof(int) * ROW * COLUMN);
-        Move *moves = malloc(sizeof(Move));
 
         //Start computation
         MPI_Barrier(MPI_COMM_WORLD);
@@ -554,19 +559,19 @@ void main() {
 
             if (n_itc == N_ITERACTION) {
                 data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
-                moves = realloc(moves, sizeof(Move) * data.n_my_empty * wd_size);
             }
 
             //Identificazione degli agenti da spostare
             Move my_moves[data.n_my_empty];
-            findMoves(data, my_moves, rank);
+            if (findMoves(data, my_moves, rank, wd_size)) break;
 
             //Move agent
-            move(data, my_moves, moves, move_data_type, wd_size, rank, n_itc);
+            move(data, my_moves, move_data_type, wd_size, rank);
 
             n_itc--;
         }
 
+        //Creazione della matrice dei risultati
         gatherResult(data, rank, mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -576,20 +581,16 @@ void main() {
 
     MPI_Finalize();
 
+    //Visualizzazione risultati
     if (wd_size <= ROW) {
         if (rank == MASTER) {
             printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
             printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
-        }
 
-        free(data.sec_size);
-        free(data.sec_disp);
-        free(data.sec_gt_size);
-        free(data.sec_gt_disp);
-        free(data.sub_mat);
-        free(data.my_emp_slots);
+            free(mat);
+        }
     } else if (rank == MASTER)
         printf("Qui Master 🧑‍🎓, computazione impossibile, numero di slave eccessivo. \n");
 }

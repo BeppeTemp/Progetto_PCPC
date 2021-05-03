@@ -13,6 +13,7 @@
         "unordered_map": "c",
         "ranges": "c",
         "typeinfo": "c",
-        "functional": "c"
+        "functional": "c",
+        "algorithm": "c"
     }
 }

@@ -20,23 +20,14 @@ void main() {
     MPI_Barrier(MPI_COMM_WORLD);
     start = MPI_Wtime();
 
-    int k=0;
+    int *test = malloc(sizeof(int));
 
     while (1){
-        int y;
-        if (k == 1)
-        {
-            y = 1;
-        }
-        
-        k++;
-
-        printf("%d \n", y);
-        printf("%d \n", k);
-
+        test =  realloc(test, sizeof(int) * 20);
     }
-    
 
+    free(test);
+    
     MPI_Barrier(MPI_COMM_WORLD);
 
     end = MPI_Wtime();
