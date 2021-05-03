@@ -8,11 +8,11 @@
 ///////////////////////////////////////
 // Impostazioni della Matrice
 ///////////////////////////////////////
-#define SIZE 50
-#define O_PERCENTAGE 30
-#define X_PERCENTAGE 30
+#define SIZE 5
+#define O_PERCENTAGE 40
+#define X_PERCENTAGE 0
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 1000
+#define N_ITERACTION 5000
 #define ASSIGN_SEED 117
 ///////////////////////////////////////
 // Costants
@@ -421,8 +421,8 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
 }
 
 //Move operation
-void findMoves(Data data, Move *my_moves, int rank) {
-    int k = 0;
+int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
+    int k = 0, is_over = 0;
     int n_moves = data.n_my_empty;
 
     //Identificazione agenti da spostare
@@ -432,6 +432,7 @@ void findMoves(Data data, Move *my_moves, int rank) {
                 my_moves[k].id_agent = data.my_emp_slots[k];
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
+                is_over++;
                 // printf("%dk: id %d, vl %c, rs %d \n", rank, my_moves[k].id_agent, my_moves[k].vl_agent, my_moves[k].id_reset);
                 if (n_moves-- == 0) break;
                 k++;
@@ -448,6 +449,13 @@ void findMoves(Data data, Move *my_moves, int rank) {
     //* for (int i = 0; i < data.n_my_empty; i++) {
     //*     printf("%di: id %d, vl %c, rs %d \n", rank, my_moves[i].id_agent, my_moves[i].vl_agent, my_moves[i].id_reset);
     //* }
+
+    int tot_over[wd_size];
+    MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
+    is_over = 0;
+    for (int i = 0; i < wd_size; i++) is_over += tot_over[i];
+
+    return (is_over == 0);
 }
 int calcMembership(Data data, int rank, int index) {
     int start = data.sec_disp[rank];
@@ -455,7 +463,7 @@ int calcMembership(Data data, int rank, int index) {
 
     return (index >= start && index < finish);
 }
-void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, int wd_size, int rank, int n_itc) {
+void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
     int sec_size[wd_size];
     int sec_disp[wd_size];
 
@@ -464,6 +472,7 @@ void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, i
         sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
     }
 
+    Move moves[data.n_my_empty * wd_size];
     MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
 
     for (int i = 0; i < data.n_my_empty * wd_size; i++) {
@@ -479,16 +488,6 @@ void move(Data data, Move *my_moves, Move *moves, MPI_Datatype move_data_type, i
 }
 
 //Stop operation
-int isOver(int n_moves, int wd_size, int rank) {
-    int all_n_moves[wd_size];
-
-    MPI_Allgather(&n_moves, 1, MPI_INT, all_n_moves, 1, MPI_INT, MPI_COMM_WORLD);
-
-    int sum = 0;
-    for (int i = 0; i < wd_size; i++) sum += all_n_moves[i];
-
-    return sum == 0;
-}
 void gatherResult(Data data, int rank, char *mat) {
     char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
     int k = 0;
@@ -501,6 +500,7 @@ void gatherResult(Data data, int rank, char *mat) {
 }
 
 void main() {
+    //Definizione delle variabili
     int n_itc = N_ITERACTION;
     char *mat;
     Data data;
@@ -528,7 +528,6 @@ void main() {
             mat = malloc(SIZE * SIZE * sizeof(char));
             generateMat(mat);
             //sampleMat(mat);
-            saveMatrixToFile(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
             printMat(mat);
         }
@@ -547,7 +546,6 @@ void main() {
         data.r_finish = calcFinish(data, rank, wd_size);
 
         data.my_emp_slots = malloc(sizeof(int) * SIZE * SIZE);
-        Move *moves = malloc(sizeof(Move));
 
         //Start computation
         MPI_Barrier(MPI_COMM_WORLD);
@@ -559,19 +557,19 @@ void main() {
 
             if (n_itc == N_ITERACTION) {
                 data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
-                moves = realloc(moves, sizeof(Move) * data.n_my_empty * wd_size);
             }
 
             //Identificazione degli agenti da spostare
             Move my_moves[data.n_my_empty];
-            findMoves(data, my_moves, rank);
+            if (findMoves(data, my_moves, rank, wd_size)) break;
 
             //Move agent
-            move(data, my_moves, moves, move_data_type, wd_size, rank, n_itc);
+            move(data, my_moves, move_data_type, wd_size, rank);
 
             n_itc--;
         }
 
+        //Creazione della matrice dei risultati
         gatherResult(data, rank, mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -581,20 +579,16 @@ void main() {
 
     MPI_Finalize();
 
+    //Visualizzazione risultati
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
             printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
             printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
-        }
 
-        free(data.sec_size);
-        free(data.sec_disp);
-        free(data.sec_gt_size);
-        free(data.sec_gt_disp);
-        free(data.sub_mat);
-        free(data.my_emp_slots);
+            free(mat);
+        }
     } else if (rank == MASTER)
         printf("Qui Master 🧑‍🎓, computazione impossibile, numero di slave eccessivo. \n");
 }
