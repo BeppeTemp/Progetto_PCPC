@@ -5,54 +5,59 @@
 
 #include "mpi.h"
 
-///////////////////////////////////////
+//////////////////////////////////
 // Impostazioni della Matrice
-///////////////////////////////////////
-#define SIZE 5
-#define O_PERCENTAGE 40
-#define X_PERCENTAGE 0
-#define SAT_THRESHOLD 33.3
-#define N_ITERACTION 5000
-#define ASSIGN_SEED 117
-///////////////////////////////////////
-// Costants
-///////////////////////////////////////
+//////////////////////////////////
+#define SIZE 5              //Dimensione della matrice
+#define O_PERCENTAGE 33     //Percentuale di agenti di tipo O
+#define X_PERCENTAGE 33     //Percentuale di agenti di tipo X
+#define SAT_THRESHOLD 33.3  //Soglia di soddisfazione in percentuale
+#define N_ITERACTION 10000  //Numero di interazioni massime consentite
+#define ASSIGN_SEED 117     //Seme per l'assegnazione degli slot vuoti
+//////////////////////////////////
+// Costanti
+//////////////////////////////////
 #define COLOR_RED "\x1b[31m"
 #define COLOR_GREEN "\x1b[32m"
 #define COLOR_YELLOW "\033[0;33m"
 #define COLOR_RESET "\x1b[0m"
 #define MASTER 0
 #define MAX_RAND_VALUE 99
-///////////////////////////////////////
+///////////////////////////////////
 
-//Structs definition
+//Definizione delle strutture
 typedef struct {
-    //Start and finish id of submat
+    //Valori relativi di inizio e fine sottomatrice
     int r_start;
     int r_finish;
 
-    //Submat of a specific process
+    //Sottomatrice assegnata al processo
     char *sub_mat;
 
-    //Number of assigned empty slots and id
+    //Numero di posizioni vuote assegnate
     int n_my_empty;
     int *my_emp_slots;
 
-    //Generale section and displacement for al processes
+    //Sezioni per la gather di divisione del workload
     int *sec_size;
     int *sec_disp;
 
-    //Generale section and displacement for gather operation
+    //Sezione per la gather di chiusura
     int *sec_gt_size;
     int *sec_gt_disp;
 } Data;
 typedef struct {
+    //Indice di arrivo dell'agente in spostamento
     int id_agent;
+
+    //Indice di partenza dell'agente in spostamento
     int id_reset;
+
+    //Tipologia di agente in spostamente
     char vl_agent;
 } Move;
 
-// Debug functions
+//? Funzioni per il debug ?//
 void sampleMat(char *mat) {
     mat[0] = 'X';
     mat[1] = 'O';
@@ -87,36 +92,11 @@ void sampleMat(char *mat) {
 void syncProcess(unsigned int rank) {
     usleep(rank * 500);
 }
+/* Funzioni inutili
 void saveMatrixToFile(char *mat) {
     FILE *file = fopen("Matrix.txt", "w");
     int results = fputs(mat, file);
     fclose(file);
-}
-
-//Matrix generation
-char randomValue() {
-    int value = rand() % MAX_RAND_VALUE + 1;
-    if (value > 0 && value <= O_PERCENTAGE)
-        return 'O';
-    else if (value > O_PERCENTAGE && value <= (X_PERCENTAGE + O_PERCENTAGE))
-        return 'X';
-    else
-        return ' ';
-}
-void generateMat(char *mat) {
-    srand(time(NULL) + MASTER);
-    for (int i = 0; i < (SIZE * SIZE); i++)
-        mat[i] = randomValue();
-}
-
-//Print funtions for debugging
-void printChar(char x) {
-    if (x == 'O')
-        printf(COLOR_GREEN " %c " COLOR_RESET, x);
-    if (x == 'X')
-        printf(COLOR_RED " %c " COLOR_RESET, x);
-    if (x == ' ')
-        printf("   ");
 }
 void printCharYellow(char x) {
     if (x == 'O')
@@ -160,16 +140,6 @@ void printRows(char vet[], int start, int len, int is_Ylw) {
                 printf("|\n");
         }
 }
-void printMat(char *mat) {
-    printf("\n");
-    for (int i = 0; i < (SIZE * SIZE); i++) {
-        printf("|");
-        printChar(mat[i]);
-        if (((i + 1) % (SIZE) == 0) && (i != 0))
-            printf("|\n");
-    }
-    printf("\n");
-}
 void printSubMat(int wd_size, char *mat, int row, int rank) {
     printf("\n");
     if (rank == 0) {
@@ -186,9 +156,46 @@ void printSubMat(int wd_size, char *mat, int row, int rank) {
         printRows(mat, (row * SIZE) - SIZE, row * SIZE, 1);
         printf("\n");
     }
+}*/
+//?-----------------?//
+
+//Funzioni di generazione della matrice
+char randomValue() {
+    int value = rand() % MAX_RAND_VALUE + 1;
+    if (value > 0 && value <= O_PERCENTAGE)
+        return 'O';
+    else if (value > O_PERCENTAGE && value <= (X_PERCENTAGE + O_PERCENTAGE))
+        return 'X';
+    else
+        return ' ';
+}
+void generateMat(char *mat) {
+    srand(time(NULL) + MASTER);
+    for (int i = 0; i < (SIZE * SIZE); i++)
+        mat[i] = randomValue();
 }
 
-//Divide matrix in n row per process
+//Funzioni di stampa
+void printChar(char x) {
+    if (x == 'O')
+        printf(COLOR_GREEN " %c " COLOR_RESET, x);
+    if (x == 'X')
+        printf(COLOR_RED " %c " COLOR_RESET, x);
+    if (x == ' ')
+        printf("   ");
+}
+void printMat(char *mat) {
+    printf("\n");
+    for (int i = 0; i < (SIZE * SIZE); i++) {
+        printf("|");
+        printChar(mat[i]);
+        if (((i + 1) % (SIZE) == 0) && (i != 0))
+            printf("|\n");
+    }
+    printf("\n");
+}
+
+//Funzioni per la divisione della matrice
 void calcSizes(int wd_size, Data data) {
     int section = SIZE / (wd_size);
     int difference = SIZE % (wd_size);
@@ -207,12 +214,6 @@ void calcSizes(int wd_size, Data data) {
             data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (SIZE * 2);
         }
     }
-    //! Debug //
-    //* printf("Sezioni generate: ");
-    //* printVetInt(data.sec_size, wd_size);
-    //* printf("Displacements generati: ");
-    //* printVetInt(data.sec_disp, wd_size);
-    //! ----- //
 }
 int calcStart(int rank, int wd_size) {
     if (rank == 0)
@@ -229,7 +230,7 @@ int calcFinish(Data data, int rank, int wd_size) {
         return data.sec_size[rank] - SIZE - 1;
 }
 
-//Calculate the degree of satisfaction of a single agent
+//Funzioni per il calcolo del grado di soddisfazione
 void convertIndex(int id, int *row_index, int *col_index) {
     *row_index = id / SIZE;
     *col_index = id % SIZE;
@@ -237,28 +238,28 @@ void convertIndex(int id, int *row_index, int *col_index) {
 int isMyKind(int my_index, int x_index, Data data) {
     return data.sub_mat[my_index] == data.sub_mat[x_index];
 }
-void calcSatCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
+void satCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
     *neigh += 3;
     switch (pos) {
-        //Upper left corner
+        //Angolo superiore sinistro
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             break;
-        //Upper right corner
+        //Angolo superiore destro
         case 1:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
-        //Lower left corner
+        //Angolo inferiore sinistro
         case 2:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id - SIZE), data);
             *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
-        //Lower right corner
+        //Angolo inferiore destro
         case 3:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id - SIZE), data);
@@ -266,10 +267,10 @@ void calcSatCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
             break;
     }
 }
-void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
+void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
     *neigh += 5;
     switch (pos) {
-        //Upper edge
+        //Bordo superiore
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
@@ -277,7 +278,7 @@ void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
-        //Left edge
+        //Bordo sinistro
         case 1:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
@@ -285,7 +286,7 @@ void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
-        //Right edge
+        //Bordo destro
         case 2:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
@@ -293,7 +294,7 @@ void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
             break;
-        //Lower edge
+        //Bordo inferiore
         case 3:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
@@ -303,7 +304,7 @@ void calcSatEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             break;
     }
 }
-void calcSatCenter(int id, Data data, int *neigh, int *my_kynd) {
+void satCenter(int id, Data data, int *neigh, int *my_kynd) {
     *neigh += 8;
     *my_kynd += isMyKind(id, id + 1, data);
     *my_kynd += isMyKind(id, id - 1, data);
@@ -315,60 +316,42 @@ void calcSatCenter(int id, Data data, int *neigh, int *my_kynd) {
     *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
 }
 int calcSat(int id, Data data, int rank) {
-    int neigh = 0;
-    int my_kynd = 0;
+    int neigh = 0, my_kynd = 0;
     int row = data.sec_size[rank] / SIZE;
-
-    int row_index;
-    int col_index;
+    int row_index, col_index;
 
     convertIndex(id, &row_index, &col_index);
 
     if (row_index == 0)
         if (col_index == 0)
-            calcSatCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
+            satCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
         else if (col_index == SIZE - 1)
-            calcSatCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
+            satCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
         else
-            calcSatEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
+            satEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
 
     else if (row_index == row - 1)
         if (col_index == 0)
-            calcSatCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
+            satCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
         else if (col_index == SIZE - 1)
-            calcSatCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
+            satCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
         else
-            calcSatEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
+            satEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
 
     else if (col_index == 0 && row_index > 0 && row_index < row - 1)
-        calcSatEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
+        satEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
 
     else if (col_index == SIZE - 1 && row_index > 0 && row_index < row)
-        calcSatEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
+        satEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
     else
-        calcSatCenter(id, data, &neigh, &my_kynd);  //Center
+        satCenter(id, data, &neigh, &my_kynd);  //Center
 
     float perc = (100 / (float)neigh) * my_kynd;
-
-    //! Debug //
-    /*printf("Rank: %d\n", rank);
-    printf("Value: %c\n", data.sub_mat[id]);
-    printf("Index: %d\n", id);
-    printf("Rel_Row: %d\n", row);
-    printf("Row_index: %d\n", row_index);
-    printf("Col_index: %d\n", col_index);
-    printf("Neighborhood: %d\n", neigh);
-    printf("Kind: %d\n", my_kynd);
-    printf("Perc: %.1f\n\n", perc);*/
-    //! ----- //
-
     return perc >= SAT_THRESHOLD;
 }
 
-//Empty slots management
+//Funzioni di gestione degli slot liberi
 void shuffle(int *vet, int length) {
-    srand(ASSIGN_SEED);
-
     for (int i = 0; i < length - 1; i++) {
         size_t j = i + rand() / (RAND_MAX / (length - i) + 1);
         int t = vet[j];
@@ -381,8 +364,8 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     int vet_siz[wd_size];
     int vet_disp[wd_size];
 
-    //Individuazione degli slot vuoti
-    int *vet_emp = malloc(sizeof(int) * data.r_finish - data.r_start);
+    //Individuazione degli slot liberi nella sottomatrice
+    int vet_emp[data.r_finish - data.r_start];
     int n_my_emp = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] == ' ') {
@@ -391,27 +374,24 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
         }
     }
 
+    //Aggregazione degli slot liberi globali
     MPI_Allgather(&n_my_emp, 1, MPI_INT, vet_siz, 1, MPI_INT, MPI_COMM_WORLD);
-
     for (int i = 0; i < wd_size; i++) {
         empty_tot += vet_siz[i];
         vet_disp[i] = i == 0 ? 0 : vet_disp[i - 1] + vet_siz[i - 1];
     }
-
-    int *emp_slots = malloc(sizeof(int) * empty_tot);
-
+    int emp_slots[empty_tot];
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
-    free(vet_emp);
 
-    //Randomizzazione dell'array
-    for (int i = 0; i < wd_size; i++) {
+    //Randomizzazione dell'array degli slot liberi
+    srand(ASSIGN_SEED);
+    for (int i = 0; i < rand() % 10; i++) {
         shuffle(emp_slots, empty_tot);
     }
 
-    //Assegnazione degli slot vuoti
+    //Assegnazione degli slot liberi ai processi
     data.n_my_empty = empty_tot / wd_size;
     int k = rank * data.n_my_empty;
-
     for (int i = 0; i < data.n_my_empty; i++) {
         my_emp_slots[i] = emp_slots[k];
         k++;
@@ -420,7 +400,7 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     return data.n_my_empty;
 }
 
-//Move operation
+//Funzioni per lo spostamento degli agenti
 int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     int k = 0, is_over = 0;
     int n_moves = data.n_my_empty;
@@ -433,7 +413,6 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
                 is_over++;
-                // printf("%dk: id %d, vl %c, rs %d \n", rank, my_moves[k].id_agent, my_moves[k].vl_agent, my_moves[k].id_reset);
                 if (n_moves-- == 0) break;
                 k++;
             }
@@ -445,10 +424,6 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
         my_moves[k].vl_agent = 'n';
         k++;
     }
-
-    //* for (int i = 0; i < data.n_my_empty; i++) {
-    //*     printf("%di: id %d, vl %c, rs %d \n", rank, my_moves[i].id_agent, my_moves[i].vl_agent, my_moves[i].id_reset);
-    //* }
 
     int tot_over[wd_size];
     MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
@@ -489,14 +464,13 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 
 //Stop operation
 void gatherResult(Data data, int rank, char *mat) {
-    char *test = malloc(sizeof(char) * data.sec_gt_size[rank]);
+    char section[data.sec_gt_size[rank]];
     int k = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
-        test[k] = data.sub_mat[i];
+        section[k] = data.sub_mat[i];
         k++;
     }
-    MPI_Gatherv(test, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
-    free(test);
+    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 }
 
 void main() {
