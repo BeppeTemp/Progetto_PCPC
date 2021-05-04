@@ -8,11 +8,11 @@
 //////////////////////////////////
 // Impostazioni della Matrice
 //////////////////////////////////
-#define SIZE 5              //Dimensione della matrice
+#define SIZE 20              //Dimensione della matrice
 #define O_PERCENTAGE 33     //Percentuale di agenti di tipo O
 #define X_PERCENTAGE 33     //Percentuale di agenti di tipo X
 #define SAT_THRESHOLD 33.3  //Soglia di soddisfazione in percentuale
-#define N_ITERACTION 10000  //Numero di interazioni massime consentite
+#define N_ITERACTION 10      //Numero di interazioni massime consentite
 #define ASSIGN_SEED 117     //Seme per l'assegnazione degli slot vuoti
 //////////////////////////////////
 // Costanti
@@ -61,33 +61,33 @@ typedef struct {
 void sampleMat(char *mat) {
     mat[0] = 'X';
     mat[1] = 'O';
-    mat[2] = 'X';
-    mat[3] = 'X';
-    mat[4] = 'X';
+    mat[2] = 'O';
+    mat[3] = 'O';
+    mat[4] = 'O';
 
     mat[5] = 'O';
-    mat[6] = 'X';
-    mat[7] = 'O';
+    mat[6] = 'O';
+    mat[7] = ' ';
     mat[8] = 'X';
-    mat[9] = ' ';
+    mat[9] = 'X';
 
-    mat[10] = 'O';
-    mat[11] = 'X';
-    mat[12] = 'X';
-    mat[13] = 'X';
-    mat[14] = ' ';
+    mat[10] = ' ';
+    mat[11] = 'O';
+    mat[12] = ' ';
+    mat[13] = 'O';
+    mat[14] = 'O';
 
-    mat[15] = ' ';
-    mat[16] = 'X';
-    mat[17] = 'X';
-    mat[18] = ' ';
+    mat[15] = 'O';
+    mat[16] = 'O';
+    mat[17] = 'O';
+    mat[18] = 'O';
     mat[19] = ' ';
 
-    mat[20] = ' ';
-    mat[21] = ' ';
-    mat[22] = ' ';
-    mat[23] = 'O';
-    mat[24] = ' ';
+    mat[20] = 'O';
+    mat[21] = 'X';
+    mat[22] = 'X';
+    mat[23] = 'X';
+    mat[24] = 'O';
 }
 void syncProcess(unsigned int rank) {
     usleep(rank * 500);
@@ -447,10 +447,11 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
         sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
     }
 
-    Move moves[data.n_my_empty * wd_size];
+    Move *moves = malloc(sizeof(Move) * data.n_my_empty * wd_size); 
     MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
 
     for (int i = 0; i < data.n_my_empty * wd_size; i++) {
+        printf("%d: id %d, vl %c, rs %d\n", rank, moves[i].id_agent, moves[i].vl_agent, moves[i].id_reset);
         if (moves[i].id_agent != -1) {
             if (calcMembership(data, rank, moves[i].id_agent)) {
                 data.sub_mat[moves[i].id_agent - data.sec_disp[rank]] = moves[i].vl_agent;
@@ -460,6 +461,8 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
             }
         }
     }
+    printf("\n");
+    free(moves);
 }
 
 //Stop operation
@@ -503,8 +506,10 @@ void main() {
             generateMat(mat);
             //sampleMat(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            printMat(mat);
+            //printMat(mat);
         }
+
+        printf("qui ci sto");
 
         //Matrix division
         data.sec_size = malloc(sizeof(int) * wd_size);
@@ -525,6 +530,8 @@ void main() {
         MPI_Barrier(MPI_COMM_WORLD);
         start = MPI_Wtime();
 
+        
+
         while (n_itc != 0) {
             //Empty slot calculation
             data.n_my_empty = calcEmptySlots(data, data.my_emp_slots, rank, wd_size);
@@ -533,13 +540,16 @@ void main() {
                 data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
             }
 
+            
+
             //Identificazione degli agenti da spostare
-            Move my_moves[data.n_my_empty];
+            Move *my_moves = malloc(sizeof(Move) * data.n_my_empty);
             if (findMoves(data, my_moves, rank, wd_size)) break;
 
             //Move agent
             move(data, my_moves, move_data_type, wd_size, rank);
 
+            free(my_moves);
             n_itc--;
         }
 
