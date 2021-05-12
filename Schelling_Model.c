@@ -6,16 +6,16 @@
 #include "mpi.h"
 
 //////////////////////////////////
-// Impostazioni della Matrice
+// Computation settings
 //////////////////////////////////
-#define SIZE 20              //Dimensione della matrice
-#define O_PERCENTAGE 33     //Percentuale di agenti di tipo O
-#define X_PERCENTAGE 33     //Percentuale di agenti di tipo X
-#define SAT_THRESHOLD 33.3  //Soglia di soddisfazione in percentuale
-#define N_ITERACTION 10      //Numero di interazioni massime consentite
-#define ASSIGN_SEED 117     //Seme per l'assegnazione degli slot vuoti
+#define SIZE 20
+#define O_PERCENTAGE 33
+#define X_PERCENTAGE 33
+#define SAT_THRESHOLD 33.3
+#define N_ITERACTION 10
+#define ASSIGN_SEED 117
 //////////////////////////////////
-// Costanti
+// Costants
 //////////////////////////////////
 #define COLOR_RED "\x1b[31m"
 #define COLOR_GREEN "\x1b[32m"
@@ -24,40 +24,42 @@
 #define MASTER 0
 #define MAX_RAND_VALUE 99
 ///////////////////////////////////
-
-//Definizione delle strutture
+// Definition of structures
+///////////////////////////////////
 typedef struct {
-    //Valori relativi di inizio e fine sottomatrice
+    //Assigned start and finish submatrix
     int r_start;
     int r_finish;
 
-    //Sottomatrice assegnata al processo
+    //Assigned submatrix
     char *sub_mat;
 
-    //Numero di posizioni vuote assegnate
+    //Number of assigned empty locations and locations
     int n_my_empty;
     int *my_emp_slots;
 
-    //Sezioni per la gather di divisione del workload
+    //Information for the subdivision scatter
     int *sec_size;
     int *sec_disp;
 
-    //Sezione per la gather di chiusura
+    //Information for the subdivision gather
     int *sec_gt_size;
     int *sec_gt_disp;
 } Data;
 typedef struct {
-    //Indice di arrivo dell'agente in spostamento
+    //Arrival index of the moving agent
     int id_agent;
 
-    //Indice di partenza dell'agente in spostamento
+    //Starting index of the moving agent
     int id_reset;
 
-    //Tipologia di agente in spostamente
+    //Type of agent on the move
     char vl_agent;
 } Move;
+///////////////////////////////////
 
-//? Funzioni per il debug ?//
+//? Debug functions //
+//Fills the matrix with a constant set of values
 void sampleMat(char *mat) {
     mat[0] = 'X';
     mat[1] = 'O';
@@ -89,77 +91,13 @@ void sampleMat(char *mat) {
     mat[23] = 'X';
     mat[24] = 'O';
 }
+//Inserts delays in computation to synchronize the processes
 void syncProcess(unsigned int rank) {
     usleep(rank * 500);
 }
-/* Funzioni inutili
-void saveMatrixToFile(char *mat) {
-    FILE *file = fopen("Matrix.txt", "w");
-    int results = fputs(mat, file);
-    fclose(file);
-}
-void printCharYellow(char x) {
-    if (x == 'O')
-        printf(COLOR_YELLOW " %c " COLOR_RESET, x);
-    if (x == 'X')
-        printf(COLOR_YELLOW " %c " COLOR_RESET, x);
-    if (x == ' ')
-        printf(COLOR_YELLOW " _ " COLOR_RESET);
-}
-void printVetInt(int vet[], int len) {
-    if (len > 0) {
-        for (int i = 0; i < len; i++) {
-            printf("| %d ", vet[i]);
-        }
-        printf("|\n");
-    } else
-        printf("\n");
-}
-void printVetChar(char vet[], int len) {
-    if (len > 0) {
-        for (int i = 0; i < len; i++) {
-            printf("| %c ", vet[i]);
-        }
-        printf("|\n");
-    } else
-        printf("\n");
-}
-void printRows(char vet[], int start, int len, int is_Ylw) {
-    if (is_Ylw)
-        for (int i = start; i < len; i++) {
-            printf("|");
-            printCharYellow(vet[i]);
-            if (((i + 1) % (SIZE) == 0) && (i != 0))
-                printf("|\n");
-        }
-    else
-        for (int i = start; i < len; i++) {
-            printf("|");
-            printChar(vet[i]);
-            if (((i + 1) % (SIZE) == 0) && (i != 0))
-                printf("|\n");
-        }
-}
-void printSubMat(int wd_size, char *mat, int row, int rank) {
-    printf("\n");
-    if (rank == 0) {
-        printRows(mat, 0, (row - 1) * SIZE, 0);
-        printRows(mat, (row * SIZE) - SIZE, row * SIZE, 1);
-        printf("\n");
-    } else if (rank == wd_size - 1) {
-        printRows(mat, 0, SIZE, 1);
-        printRows(mat, SIZE, row * SIZE, 0);
-        printf("\n");
-    } else {
-        printRows(mat, 0, SIZE, 1);
-        printRows(mat, SIZE, (row * SIZE) - SIZE, 0);
-        printRows(mat, (row * SIZE) - SIZE, row * SIZE, 1);
-        printf("\n");
-    }
-}*/
-//?-----------------?//
 
-//Funzioni di generazione della matrice
+//? Matrix generation functions //
+//Converts a random integer value to an agent type
 char randomValue() {
     int value = rand() % MAX_RAND_VALUE + 1;
     if (value > 0 && value <= O_PERCENTAGE)
@@ -169,13 +107,15 @@ char randomValue() {
     else
         return ' ';
 }
+//Randomly fills the matrix
 void generateMat(char *mat) {
     srand(time(NULL) + MASTER);
     for (int i = 0; i < (SIZE * SIZE); i++)
         mat[i] = randomValue();
 }
 
-//Funzioni di stampa
+//? Functions for printing //
+//Print a single agent
 void printChar(char x) {
     if (x == 'O')
         printf(COLOR_GREEN " %c " COLOR_RESET, x);
@@ -184,6 +124,7 @@ void printChar(char x) {
     if (x == ' ')
         printf("   ");
 }
+//Print the entire matrix
 void printMat(char *mat) {
     printf("\n");
     for (int i = 0; i < (SIZE * SIZE); i++) {
@@ -195,7 +136,8 @@ void printMat(char *mat) {
     printf("\n");
 }
 
-//Funzioni per la divisione della matrice
+//? Functions for dividing the matrix between processes //
+//Calculate section sizes and displacements for gather and scatter operations
 void calcSizes(int wd_size, Data data) {
     int section = SIZE / (wd_size);
     int difference = SIZE % (wd_size);
@@ -215,12 +157,14 @@ void calcSizes(int wd_size, Data data) {
         }
     }
 }
+//Calculate start position of real submatrix
 int calcStart(int rank, int wd_size) {
     if (rank == 0)
         return 0;
     else
         return SIZE;
 }
+//Calculate finish position of real submatrix
 int calcFinish(Data data, int rank, int wd_size) {
     if (rank == 0)
         return data.sec_size[rank] - SIZE - 1;
@@ -230,36 +174,39 @@ int calcFinish(Data data, int rank, int wd_size) {
         return data.sec_size[rank] - SIZE - 1;
 }
 
-//Funzioni per il calcolo del grado di soddisfazione
+//? Functions for calculating the degree of satisfaction
+//Converts the index of a vector to its matrix counterpart
 void convertIndex(int id, int *row_index, int *col_index) {
     *row_index = id / SIZE;
     *col_index = id % SIZE;
 }
+//Check if two agents are of the same type
 int isMyKind(int my_index, int x_index, Data data) {
     return data.sub_mat[my_index] == data.sub_mat[x_index];
 }
+//Check the satisfaction of an agent in the corner
 void satCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
     *neigh += 3;
     switch (pos) {
-        //Angolo superiore sinistro
+        //Top left corner
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             break;
-        //Angolo superiore destro
+        //Top right corner
         case 1:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
-        //Angolo inferiore sinistro
+        //Bottom left corner
         case 2:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id - SIZE), data);
             *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
-        //Angolo inferiore destro
+        //Bottom right corner
         case 3:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id - SIZE), data);
@@ -267,10 +214,11 @@ void satCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
             break;
     }
 }
+//Check the satisfaction of an agent in the edge
 void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
     *neigh += 5;
     switch (pos) {
-        //Bordo superiore
+        //Top edge
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
@@ -278,7 +226,7 @@ void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             break;
-        //Bordo sinistro
+        //Left edge
         case 1:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
@@ -286,7 +234,7 @@ void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
             *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
             break;
-        //Bordo destro
+        //Right edge
         case 2:
             *my_kynd += isMyKind(id, id - 1, data);
             *my_kynd += isMyKind(id, (id + SIZE), data);
@@ -294,7 +242,7 @@ void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
             *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
             break;
-        //Bordo inferiore
+        //Bottom edge
         case 3:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
@@ -304,6 +252,7 @@ void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
             break;
     }
 }
+//Check the satisfaction of a central agent
 void satCenter(int id, Data data, int *neigh, int *my_kynd) {
     *neigh += 8;
     *my_kynd += isMyKind(id, id + 1, data);
@@ -315,6 +264,7 @@ void satCenter(int id, Data data, int *neigh, int *my_kynd) {
     *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
     *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
 }
+//Calculate the satisfaction of an agent
 int calcSat(int id, Data data, int rank) {
     int neigh = 0, my_kynd = 0;
     int row = data.sec_size[rank] / SIZE;
@@ -350,7 +300,8 @@ int calcSat(int id, Data data, int rank) {
     return perc >= SAT_THRESHOLD;
 }
 
-//Funzioni di gestione degli slot liberi
+//? Free locations management functions
+//Randomizes the position of values in a vector
 void shuffle(int *vet, int length) {
     for (int i = 0; i < length - 1; i++) {
         size_t j = i + rand() / (RAND_MAX / (length - i) + 1);
@@ -359,12 +310,13 @@ void shuffle(int *vet, int length) {
         vet[i] = t;
     }
 }
+//Locate all empty locations in submatrices and associates them
 int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     int empty_tot = 0;
     int vet_siz[wd_size];
     int vet_disp[wd_size];
 
-    //Individuazione degli slot liberi nella sottomatrice
+    // Find free locations in the local sub-matrix
     int vet_emp[data.r_finish - data.r_start];
     int n_my_emp = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
@@ -374,7 +326,7 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
         }
     }
 
-    //Aggregazione degli slot liberi globali
+    //Gather of global free locations
     MPI_Allgather(&n_my_emp, 1, MPI_INT, vet_siz, 1, MPI_INT, MPI_COMM_WORLD);
     for (int i = 0; i < wd_size; i++) {
         empty_tot += vet_siz[i];
@@ -383,13 +335,13 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     int emp_slots[empty_tot];
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
 
-    //Randomizzazione dell'array degli slot liberi
+    //Randomizes the array of free locations
     srand(ASSIGN_SEED);
     for (int i = 0; i < rand() % 10; i++) {
         shuffle(emp_slots, empty_tot);
     }
 
-    //Assegnazione degli slot liberi ai processi
+    //Assignment of free locations to processes
     data.n_my_empty = empty_tot / wd_size;
     int k = rank * data.n_my_empty;
     for (int i = 0; i < data.n_my_empty; i++) {
@@ -400,12 +352,12 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
     return data.n_my_empty;
 }
 
-//Funzioni per lo spostamento degli agenti
+//? Functions for moving agents
+//Locates the agents to be moved in the submatrix
 int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     int k = 0, is_over = 0;
     int n_moves = data.n_my_empty;
 
-    //Identificazione agenti da spostare
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] != ' ')
             if (!calcSat(i, data, rank)) {
@@ -425,6 +377,7 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
         k++;
     }
 
+    //Check if all processes have finished their movements
     int tot_over[wd_size];
     MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
     is_over = 0;
@@ -432,12 +385,14 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
 
     return (is_over == 0);
 }
+//Given an index and a process checks if it is associated with it
 int calcMembership(Data data, int rank, int index) {
     int start = data.sec_disp[rank];
     int finish = data.sec_disp[rank] + data.sec_size[rank];
 
     return (index >= start && index < finish);
 }
+//Carries out the movement operations of the agents
 void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
     int sec_size[wd_size];
     int sec_disp[wd_size];
@@ -447,11 +402,10 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
         sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
     }
 
-    Move *moves = malloc(sizeof(Move) * data.n_my_empty * wd_size); 
+    Move *moves = malloc(sizeof(Move) * data.n_my_empty * wd_size);
     MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
 
     for (int i = 0; i < data.n_my_empty * wd_size; i++) {
-        printf("%d: id %d, vl %c, rs %d\n", rank, moves[i].id_agent, moves[i].vl_agent, moves[i].id_reset);
         if (moves[i].id_agent != -1) {
             if (calcMembership(data, rank, moves[i].id_agent)) {
                 data.sub_mat[moves[i].id_agent - data.sec_disp[rank]] = moves[i].vl_agent;
@@ -464,8 +418,7 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
     printf("\n");
     free(moves);
 }
-
-//Stop operation
+//Ends execution if no process has dissatisfied agents
 void gatherResult(Data data, int rank, char *mat) {
     char section[data.sec_gt_size[rank]];
     int k = 0;
@@ -477,7 +430,7 @@ void gatherResult(Data data, int rank, char *mat) {
 }
 
 void main() {
-    //Definizione delle variabili
+    //Variable definitions
     int n_itc = N_ITERACTION;
     char *mat;
     Data data;
@@ -506,7 +459,7 @@ void main() {
             generateMat(mat);
             //sampleMat(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            //printMat(mat);
+            printMat(mat);
         }
 
         printf("qui ci sto");
@@ -520,7 +473,7 @@ void main() {
         data.sub_mat = malloc(sizeof(char) * data.sec_size[rank]);
         MPI_Scatterv(mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
-        //Calcolo start and finish
+        //Start and finish calculation
         data.r_start = calcStart(rank, wd_size);
         data.r_finish = calcFinish(data, rank, wd_size);
 
@@ -530,30 +483,27 @@ void main() {
         MPI_Barrier(MPI_COMM_WORLD);
         start = MPI_Wtime();
 
-        
-
         while (n_itc != 0) {
             //Empty slot calculation
             data.n_my_empty = calcEmptySlots(data, data.my_emp_slots, rank, wd_size);
 
             if (n_itc == N_ITERACTION) {
+                //End of computation test
                 data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
             }
 
-            
-
-            //Identificazione degli agenti da spostare
+            //Identification of the agents to be moved
             Move *my_moves = malloc(sizeof(Move) * data.n_my_empty);
             if (findMoves(data, my_moves, rank, wd_size)) break;
 
-            //Move agent
+            //Mobilization of agents
             move(data, my_moves, move_data_type, wd_size, rank);
 
             free(my_moves);
             n_itc--;
         }
 
-        //Creazione della matrice dei risultati
+        //Creation of the results matrix
         gatherResult(data, rank, mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -563,7 +513,7 @@ void main() {
 
     MPI_Finalize();
 
-    //Visualizzazione risultati
+    //Results display
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
             printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
