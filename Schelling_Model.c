@@ -8,11 +8,11 @@
 //////////////////////////////////
 // Computation settings
 //////////////////////////////////
-#define SIZE 00
+#define SIZE 20
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 300
+#define N_ITERACTION 100
 #define ASSIGN_SEED 10
 //////////////////////////////////
 // Costants
@@ -26,7 +26,7 @@
 ///////////////////////////////////
 // Definition of structures
 ///////////////////////////////////
-typedef struct {
+typedef struct Data {
     //Assigned start and finish submatrix
     int r_start;
     int r_finish;
@@ -36,7 +36,7 @@ typedef struct {
 
     //Number of assigned empty locations and locations
     int n_my_empty;
-    int *my_emp_slots;
+    int *my_emp_loc;
 
     //Information for the subdivision scatter
     int *sec_size;
@@ -46,7 +46,7 @@ typedef struct {
     int *sec_gt_size;
     int *sec_gt_disp;
 } Data;
-typedef struct {
+typedef struct Move {
     //Arrival index of the moving agent
     int id_agent;
 
@@ -328,13 +328,13 @@ void shuffle(int *vet, int length) {
     }
 }
 //Locate all empty locations in submatrices and associates them
-int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size, int n_itc) {
+int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc) {
     int empty_tot = 0;
     int vet_siz[wd_size];
     int vet_disp[wd_size];
 
     // Find free locations in the local sub-matrix
-    int vet_emp[data.r_finish - data.r_start];
+    int *vet_emp = malloc(sizeof(int) * (data.r_finish - data.r_start));
     int n_my_emp = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] == ' ') {
@@ -352,21 +352,21 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size, int n_it
     int *emp_slots = malloc(sizeof(int) * empty_tot);
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
 
-
     //Randomizes the array of free locations
     srand(ASSIGN_SEED + n_itc);
-
-        shuffle(emp_slots, empty_tot);
+    shuffle(emp_slots, empty_tot);
     
 
     //Assignment of free locations to processes
     data.n_my_empty = empty_tot / wd_size;
     int k = rank * data.n_my_empty;
     for (int i = 0; i < data.n_my_empty; i++) {
-        my_emp_slots[i] = emp_slots[k];
+        my_emp_loc[i] = emp_slots[k];
         k++;
     }
 
+    free(emp_slots);
+    free(vet_emp);
     return data.n_my_empty;
 }
 
@@ -379,7 +379,7 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] != ' ')
             if (!calcSat(i, data, rank)) {
-                my_moves[k].id_agent = data.my_emp_slots[k];
+                my_moves[k].id_agent = data.my_emp_loc[k];
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
                 is_over++;
@@ -438,13 +438,14 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 }
 //Ends execution if no process has dissatisfied agents
 void gatherResult(Data data, int rank, char *mat) {
-    char section[data.sec_gt_size[rank]];
+    char *section= malloc(sizeof(char) * data.sec_gt_size[rank]);
     int k = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         section[k] = data.sub_mat[i];
         k++;
     }
     MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    free(section);
 }
 
 void main() {
@@ -476,8 +477,8 @@ void main() {
             mat = malloc(SIZE * SIZE * sizeof(char));
             generateMat(mat);
             //sampleMat(mat);
-            //printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            //printMat(mat);
+            printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
+            printMat(mat);
         }
 
         //Matrix division
@@ -493,7 +494,7 @@ void main() {
         data.r_start = calcStart(rank, wd_size);
         data.r_finish = calcFinish(data, rank, wd_size);
 
-        data.my_emp_slots = malloc(sizeof(int) * SIZE * SIZE);
+        data.my_emp_loc = malloc(sizeof(int) * SIZE * SIZE);
 
         //Start computation
         MPI_Barrier(MPI_COMM_WORLD);
@@ -501,11 +502,11 @@ void main() {
 
         while (n_itc != 0) {
             //Empty slot calculation
-            data.n_my_empty = calcEmptySlots(data, data.my_emp_slots, rank, wd_size, n_itc);
+            data.n_my_empty = calcEmptySlots(data, data.my_emp_loc, rank, wd_size, n_itc);
 
             if (n_itc == N_ITERACTION) {
                 //End of computation test
-                data.my_emp_slots = realloc(data.my_emp_slots, sizeof(int) * data.n_my_empty);
+                data.my_emp_loc = realloc(data.my_emp_loc, sizeof(int) * data.n_my_empty);
             }
 
             //Identification of the agents to be moved
@@ -532,8 +533,8 @@ void main() {
     //Results display
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
-            //printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
-            //printMat(mat);
+            printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+            printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
 
