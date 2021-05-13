@@ -8,11 +8,11 @@
 //////////////////////////////////
 // Computation settings
 //////////////////////////////////
-#define SIZE 20
+#define SIZE 5
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 10
+#define N_ITERACTION 100
 #define ASSIGN_SEED 117
 //////////////////////////////////
 // Costants
@@ -62,34 +62,34 @@ typedef struct {
 //Fills the matrix with a constant set of values
 void sampleMat(char *mat) {
     mat[0] = 'X';
-    mat[1] = 'O';
+    mat[1] = 'X';
     mat[2] = 'O';
-    mat[3] = 'O';
-    mat[4] = 'O';
+    mat[3] = ' ';
+    mat[4] = 'X';
 
     mat[5] = 'O';
     mat[6] = 'O';
-    mat[7] = ' ';
-    mat[8] = 'X';
-    mat[9] = 'X';
+    mat[7] = 'O';
+    mat[8] = 'O';
+    mat[9] = ' ';
 
-    mat[10] = ' ';
-    mat[11] = 'O';
-    mat[12] = ' ';
+    mat[10] = 'X';
+    mat[11] = 'X';
+    mat[12] = 'O';
     mat[13] = 'O';
-    mat[14] = 'O';
+    mat[14] = ' ';
 
-    mat[15] = 'O';
-    mat[16] = 'O';
+    mat[15] = 'X';
+    mat[16] = 'X';
     mat[17] = 'O';
-    mat[18] = 'O';
-    mat[19] = ' ';
+    mat[18] = 'X';
+    mat[19] = 'X';
 
-    mat[20] = 'O';
+    mat[20] = ' ';
     mat[21] = 'X';
-    mat[22] = 'X';
-    mat[23] = 'X';
-    mat[24] = 'O';
+    mat[22] = ' ';
+    mat[23] = ' ';
+    mat[24] = 'X';
 }
 //Inserts delays in computation to synchronize the processes
 void syncProcess(unsigned int rank) {
@@ -361,7 +361,9 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] != ' ')
             if (!calcSat(i, data, rank)) {
+                //if (rank == 0) printf("ins: %d\n", i);
                 my_moves[k].id_agent = data.my_emp_slots[k];
+                if(rank == 0) printf("|%d|", data.my_emp_slots[n_moves]);
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
                 is_over++;
@@ -369,6 +371,9 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
                 k++;
             }
     }
+    if (rank == 0) printf("\n");
+    
+
 
     for (int i = 0; i < n_moves; i++) {
         my_moves[k].id_agent = -1;
@@ -381,6 +386,14 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     int tot_over[wd_size];
     MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
     is_over = 0;
+
+    if (rank == 0){
+        for (int i = 0; i < wd_size; i++) {
+            printf("%d\n", tot_over[i]);
+        }
+        printf("\n");
+    }
+
     for (int i = 0; i < wd_size; i++) is_over += tot_over[i];
 
     return (is_over == 0);
@@ -415,7 +428,6 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
             }
         }
     }
-    printf("\n");
     free(moves);
 }
 //Ends execution if no process has dissatisfied agents
@@ -456,13 +468,11 @@ void main() {
         //Matrix generation
         if (rank == MASTER) {
             mat = malloc(SIZE * SIZE * sizeof(char));
-            generateMat(mat);
-            //sampleMat(mat);
+            //generateMat(mat);
+            sampleMat(mat);
             printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
             printMat(mat);
         }
-
-        printf("qui ci sto");
 
         //Matrix division
         data.sec_size = malloc(sizeof(int) * wd_size);
