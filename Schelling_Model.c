@@ -8,7 +8,7 @@
 //////////////////////////////////
 // Computation settings
 //////////////////////////////////
-#define SIZE 20
+#define SIZE 10000
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
@@ -355,7 +355,6 @@ int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc)
     //Randomizes the array of free locations
     srand(ASSIGN_SEED + n_itc);
     shuffle(emp_slots, empty_tot);
-    
 
     //Assignment of free locations to processes
     data.n_my_empty = empty_tot / wd_size;
@@ -396,6 +395,7 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     }
 
     //Check if all processes have finished their movements
+    //TODO qui ci va un all reduce in qualche modo
     int tot_over[wd_size];
     MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
     is_over = 0;
@@ -438,7 +438,7 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 }
 //Ends execution if no process has dissatisfied agents
 void gatherResult(Data data, int rank, char *mat) {
-    char *section= malloc(sizeof(char) * data.sec_gt_size[rank]);
+    char *section = malloc(sizeof(char) * data.sec_gt_size[rank]);
     int k = 0;
     for (int i = data.r_start; i <= data.r_finish; i++) {
         section[k] = data.sub_mat[i];
@@ -477,8 +477,8 @@ void main() {
             mat = malloc(SIZE * SIZE * sizeof(char));
             generateMat(mat);
             //sampleMat(mat);
-            printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            printMat(mat);
+            //printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
+            //printMat(mat);
         }
 
         //Matrix division
@@ -533,8 +533,8 @@ void main() {
     //Results display
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
-            printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
-            printMat(mat);
+            //printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+            //printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
 
