@@ -8,12 +8,12 @@
 //////////////////////////////////
 // Computation settings
 //////////////////////////////////
-#define SIZE 5
+#define SIZE 00
 #define O_PERCENTAGE 33
 #define X_PERCENTAGE 33
 #define SAT_THRESHOLD 33.3
-#define N_ITERACTION 100
-#define ASSIGN_SEED 117
+#define N_ITERACTION 300
+#define ASSIGN_SEED 10
 //////////////////////////////////
 // Costants
 //////////////////////////////////
@@ -94,6 +94,16 @@ void sampleMat(char *mat) {
 //Inserts delays in computation to synchronize the processes
 void syncProcess(unsigned int rank) {
     usleep(rank * 500);
+}
+//Print integer array
+void printVetInt(int vet[], int len) {
+    if (len > 0) {
+        for (int i = 0; i < len; i++) {
+            printf("| %d ", vet[i]);
+        }
+        printf("|\n");
+    } else
+        printf("\n");
 }
 
 //? Matrix generation functions //
@@ -301,17 +311,24 @@ int calcSat(int id, Data data, int rank) {
 }
 
 //? Free locations management functions
+//Swap two value
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
 //Randomizes the position of values in a vector
 void shuffle(int *vet, int length) {
-    for (int i = 0; i < length - 1; i++) {
-        size_t j = i + rand() / (RAND_MAX / (length - i) + 1);
-        int t = vet[j];
-        vet[j] = vet[i];
-        vet[i] = t;
+    for (int i = length - 1; i > 0; i--) {
+        // Pick a random index from 0 to i
+        int j = rand() % (i + 1);
+
+        // Swap arr[i] with the element at random index
+        swap(&vet[i], &vet[j]);
     }
 }
 //Locate all empty locations in submatrices and associates them
-int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
+int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size, int n_itc) {
     int empty_tot = 0;
     int vet_siz[wd_size];
     int vet_disp[wd_size];
@@ -332,14 +349,15 @@ int calcEmptySlots(Data data, int *my_emp_slots, int rank, int wd_size) {
         empty_tot += vet_siz[i];
         vet_disp[i] = i == 0 ? 0 : vet_disp[i - 1] + vet_siz[i - 1];
     }
-    int emp_slots[empty_tot];
+    int *emp_slots = malloc(sizeof(int) * empty_tot);
     MPI_Allgatherv(vet_emp, n_my_emp, MPI_INT, emp_slots, vet_siz, vet_disp, MPI_INT, MPI_COMM_WORLD);
 
+
     //Randomizes the array of free locations
-    srand(ASSIGN_SEED);
-    for (int i = 0; i < rand() % 10; i++) {
+    srand(ASSIGN_SEED + n_itc);
+
         shuffle(emp_slots, empty_tot);
-    }
+    
 
     //Assignment of free locations to processes
     data.n_my_empty = empty_tot / wd_size;
@@ -361,19 +379,14 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] != ' ')
             if (!calcSat(i, data, rank)) {
-                //if (rank == 0) printf("ins: %d\n", i);
                 my_moves[k].id_agent = data.my_emp_slots[k];
-                if(rank == 0) printf("|%d|", data.my_emp_slots[n_moves]);
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
                 is_over++;
-                if (n_moves-- == 0) break;
+                if (--n_moves == 0) break;
                 k++;
             }
     }
-    if (rank == 0) printf("\n");
-    
-
 
     for (int i = 0; i < n_moves; i++) {
         my_moves[k].id_agent = -1;
@@ -386,13 +399,6 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     int tot_over[wd_size];
     MPI_Allgather(&is_over, 1, MPI_INT, tot_over, 1, MPI_INT, MPI_COMM_WORLD);
     is_over = 0;
-
-    if (rank == 0){
-        for (int i = 0; i < wd_size; i++) {
-            printf("%d\n", tot_over[i]);
-        }
-        printf("\n");
-    }
 
     for (int i = 0; i < wd_size; i++) is_over += tot_over[i];
 
@@ -468,10 +474,10 @@ void main() {
         //Matrix generation
         if (rank == MASTER) {
             mat = malloc(SIZE * SIZE * sizeof(char));
-            //generateMat(mat);
-            sampleMat(mat);
-            printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            printMat(mat);
+            generateMat(mat);
+            //sampleMat(mat);
+            //printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
+            //printMat(mat);
         }
 
         //Matrix division
@@ -495,7 +501,7 @@ void main() {
 
         while (n_itc != 0) {
             //Empty slot calculation
-            data.n_my_empty = calcEmptySlots(data, data.my_emp_slots, rank, wd_size);
+            data.n_my_empty = calcEmptySlots(data, data.my_emp_slots, rank, wd_size, n_itc);
 
             if (n_itc == N_ITERACTION) {
                 //End of computation test
@@ -526,8 +532,8 @@ void main() {
     //Results display
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
-            printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
-            printMat(mat);
+            //printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+            //printMat(mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in ms = %f\n", end - start);
 
