@@ -1,266 +1,131 @@
 <html>
 <head>
 <style>
-body { font-family: Verdana, monospace; }
+body {
+font-family: 'Segoe UI', monospace;
+color: rgb(190, 190, 190);
+background-color: #1c1f24;
+}
 table, th {
 border-collapse: collapse;
 border-style: inset;
-border-color: black;
+border-color: rgb(83, 83, 83);
 border-width: 2px;
-padding: 3px;
+padding-left: 5px;
+padding-right: 5px;
 }
 .green { color: green; }
 .red { color: red; }
 </style>
 </head>
 <body>
+<h1>Shelling model computation result</h1>
+<h3>⚙ Computation settings:</h2>
+<ul>
+<li>📏 Row: <b>10.</b></li>
+<li>📐 Collumn: <b>10.</b></li>
+<p></p>
+<li>❎ population: <b>33%.</b></li>
+<li>⭕ population: <b>33%.</b></li>
+<li>🤷‍♂️ empty slots: <b>34%.</b></li>
+<p></p>
+<li>😎 Satisfaction threshold: <b>33%.</b></li>
+<li>📟 Empty slot assigment seed: <b>10.</b></li>
+<li>🚀 Max iterations: <b>100.</b> </li>
+</ul>
+<h3>📈📉 Computations result:</h2>
+<ul>
+<li>🔬 Number of iterations: <b>12.</b> </li>
+<li>⏲ Time: <b>0.000452sec.</b></li>
+</ul>
+<h3>Result matrix:</h3>
 <table>
 <tr>
 <th class="green">O</th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
 <th></th>
 <th></th>
+<th class="red">X</th>
 <th></th>
+<th class="red">X</th>
+</tr>
+<tr><th class="green">O</th>
+<th class="red">X</th>
+<th class="red">X</th>
+<th class="red">X</th>
 <th></th>
+<th class="red">X</th>
+<th class="red">X</th>
 <th></th>
-<th></th>
+<th class="red">X</th>
+<th class="red">X</th>
 </tr>
 <tr><th class="green">O</th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
 <th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
 </tr>
 <tr><th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
+<th class="red">X</th>
+</tr>
+<tr><th class="green">O</th>
+<th class="green">O</th>
 <th></th>
 <th></th>
 <th class="green">O</th>
 <th class="green">O</th>
+<th class="green">O</th>
+<th class="green">O</th>
+<th class="green">O</th>
+<th></th>
 </tr>
 <tr><th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
+<th class="green">O</th>
+<th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
 </tr>
 <tr><th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-</tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
 <th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
-<th></th>
 <th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
 <th class="green">O</th>
-<th class="red">X</th>
+<th class="green">O</th>
 </tr>
 <tr><th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-</tr>
-<tr><th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th></th>
 <th></th>
-<th></th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
 </tr>
@@ -269,385 +134,51 @@ padding: 3px;
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-</tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th></th>
 <th></th>
 <th></th>
 <th></th>
 </tr>
 <tr><th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
 <th></th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th></th>
 <th></th>
-<th class="green">O</th>
+<th></th>
 </tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th></th>
+<tr></ul>
+<h3>Initial matrix:</h3>
+<table>
+<tr>
+<th class="green">O</th>
+<th class="green">O</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
-<th></th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-</tr>
-<tr><th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th class="green">O</th>
 </tr>
 <tr><th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th></th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-</tr>
-<tr><th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 <th class="green">O</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-</tr>
-<tr><th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
 <th class="green">O</th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-</tr>
-<tr><th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-</tr>
-<tr><th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-<tr><th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-<tr><th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
 </tr>
 <tr><th class="green">O</th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
@@ -655,295 +186,83 @@ padding: 3px;
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
-<th></th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
 </tr>
 <tr><th class="green">O</th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th></th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th></th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
+<th class="red">X</th>
 <th class="green">O</th>
 <th class="green">O</th>
 </tr>
 <tr><th></th>
-<th class="green">O</th>
-<th class="green">O</th>
+<th class="red">X</th>
+<th class="red">X</th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
+<th></th>
 <th class="red">X</th>
 <th class="green">O</th>
 <th class="green">O</th>
 <th></th>
 <th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
 </tr>
 <tr><th></th>
+<th class="green">O</th>
+<th class="green">O</th>
+<th class="red">X</th>
+<th class="red">X</th>
 <th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
 <th class="green">O</th>
 <th class="green">O</th>
+<th></th>
+</tr>
+<tr><th class="red">X</th>
+<th class="red">X</th>
+<th></th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
+<th class="red">X</th>
 <th class="green">O</th>
 <th class="green">O</th>
 </tr>
 <tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th></th>
 <th class="red">X</th>
 <th></th>
+<th class="red">X</th>
 <th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
+<th class="red">X</th>
 <th></th>
 <th class="red">X</th>
 <th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-</tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-</tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-</tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-</tr>
-<tr><th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
 </tr>
 <tr><th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
 <th class="red">X</th>
 <th class="red">X</th>
 <th></th>
+<th></th>
 <th class="green">O</th>
+<th></th>
+<th></th>
+<th class="green">O</th>
+<th class="green">O</th>
+</tr>
+<tr><th class="red">X</th>
+<th></th>
+<th></th>
+<th class="red">X</th>
+<th></th>
+<th class="green">O</th>
+<th></th>
+<th></th>
+<th class="red">X</th>
 <th class="green">O</th>
 </tr>
 <tr></table>

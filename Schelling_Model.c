@@ -6,12 +6,12 @@
 #include "mpi.h"
 
 //*#region Computation settings
-#define SIZE 30            //? Size of matrix
-#define O_PERCENTAGE 33     //? Percentage of O agents
-#define X_PERCENTAGE 33     //? Percentage of X agents
-#define SAT_THRESHOLD 33.3  //? Percentage of satisfaction required
-#define N_ITERACTION 100    //? Number of iteration calculated
-#define ASSIGN_SEED 10      //? Seed for free location assignment
+#define SIZE 20           //? Size of matrix
+#define O_PERCENTAGE 33   //? Percentage of O agents
+#define X_PERCENTAGE 33   //? Percentage of X agents
+#define SAT_THRESHOLD 33  //? Percentage of satisfaction required
+#define N_ITERACTION 100  //? Number of iteration calculated
+#define ASSIGN_SEED 10    //? Seed for free location assignment
 //#endregion
 
 //*#region Utils and Costants
@@ -55,37 +55,37 @@ typedef struct Move {
 //#endregion
 
 //!#region Debug functions
-void sampleMat(char *mat) {
+void sampleMat(char *i_mat) {
     //Fills the matrix with a constant set of values
-    mat[0] = 'X';
-    mat[1] = 'X';
-    mat[2] = 'O';
-    mat[3] = ' ';
-    mat[4] = 'X';
+    i_mat[0] = 'X';
+    i_mat[1] = 'X';
+    i_mat[2] = 'O';
+    i_mat[3] = ' ';
+    i_mat[4] = 'X';
 
-    mat[5] = 'O';
-    mat[6] = 'O';
-    mat[7] = 'O';
-    mat[8] = 'O';
-    mat[9] = ' ';
+    i_mat[5] = 'O';
+    i_mat[6] = 'O';
+    i_mat[7] = 'O';
+    i_mat[8] = 'O';
+    i_mat[9] = ' ';
 
-    mat[10] = 'X';
-    mat[11] = 'X';
-    mat[12] = 'O';
-    mat[13] = 'O';
-    mat[14] = ' ';
+    i_mat[10] = 'X';
+    i_mat[11] = 'X';
+    i_mat[12] = 'O';
+    i_mat[13] = 'O';
+    i_mat[14] = ' ';
 
-    mat[15] = 'X';
-    mat[16] = 'X';
-    mat[17] = 'O';
-    mat[18] = 'X';
-    mat[19] = 'X';
+    i_mat[15] = 'X';
+    i_mat[16] = 'X';
+    i_mat[17] = 'O';
+    i_mat[18] = 'X';
+    i_mat[19] = 'X';
 
-    mat[20] = ' ';
-    mat[21] = 'X';
-    mat[22] = ' ';
-    mat[23] = ' ';
-    mat[24] = 'X';
+    i_mat[20] = ' ';
+    i_mat[21] = 'X';
+    i_mat[22] = ' ';
+    i_mat[23] = ' ';
+    i_mat[24] = 'X';
 }
 void syncProcess(unsigned int rank) {
     //Inserts delays in computation to synchronize the processes
@@ -114,11 +114,11 @@ char randomValue() {
     else
         return ' ';
 }
-void generateMat(char *mat) {
+void generateMat(char *i_mat) {
     //Randomly fills the matrix
     srand(time(NULL) + MASTER);
     for (int i = 0; i < (SIZE * SIZE); i++)
-        mat[i] = randomValue();
+        i_mat[i] = randomValue();
 }
 //#endregion
 
@@ -132,12 +132,12 @@ void printChar(char x) {
     if (x == ' ')
         printf("   ");
 }
-void printMat(char *mat) {
+void printMat(char *i_mat) {
     //Print the entire matrix
     printf("\n");
     for (int i = 0; i < (SIZE * SIZE); i++) {
         printf("|");
-        printChar(mat[i]);
+        printChar(i_mat[i]);
         if (((i + 1) % (SIZE) == 0) && (i != 0))
             printf("|\n");
     }
@@ -150,35 +150,71 @@ void printCharHTML(FILE *fp, char x) {
         fprintf(fp, "<th class=\"red\">%c</th>\n", x);
     if (x == ' ')
         fprintf(fp, "<th></th>\n");
-    fflush(fp);
 }
-void printResultHTML(char *mat) {
+void printResultHTML(char *i_mat, char *r_mat, int n_itc, double time) {
     //Print the entire matrix on file
     FILE *fp;
     fp = fopen("result.html", "w+");
     fprintf(fp,
             "<html>\n<head>\n<style>\n"
-            "body { font-family: Verdana, monospace; }\n"
+            "body {\n"
+            "font-family: 'Segoe UI', monospace;\n"
+            "color: rgb(190, 190, 190);\n"
+            "background-color: #1c1f24;\n"
+            "}\n"
             "table, th {\n"
             "border-collapse: collapse;\n"
             "border-style: inset;\n"
-            "border-color: black;\n"
+            "border-color: rgb(83, 83, 83);\n"
             "border-width: 2px;\n"
-            "padding: 3px;\n"
+            "padding-left: 5px;\n"
+            "padding-right: 5px;\n"
             "}\n"
             ".green { color: green; }\n"
             ".red { color: red; }\n"
-            "</style>\n</head>\n<body>\n<table>\n<tr>\n");
-    fflush(fp);
+            "</style>\n</head>\n<body>\n"
+            "<h1>Shelling model computation result</h1>\n"
+            "<h3>⚙ Computation settings:</h2>\n"
+            "<ul>\n");
+    fprintf(fp, "<li>📏 Row: <b>%d.</b></li>\n", SIZE);
+    fprintf(fp, "<li>📐 Collumn: <b>%d.</b></li>\n", SIZE);
+    fprintf(fp, "<p></p>\n");
+    fprintf(fp, "<li>❎ population: <b>%d%%.</b></li>\n", X_PERCENTAGE);
+    fprintf(fp, "<li>⭕ population: <b>%d%%.</b></li>\n", O_PERCENTAGE);
+    fprintf(fp, "<li>🤷‍♂️ empty slots: <b>%d%%.</b></li>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
+    fprintf(fp, "<p></p>\n");
+    fprintf(fp, "<li>😎 Satisfaction threshold: <b>%d%%.</b></li>\n", SAT_THRESHOLD);
+    fprintf(fp, "<li>📟 Empty slot assigment seed: <b>%d.</b></li>\n", ASSIGN_SEED);
+    fprintf(fp, "<li>🚀 Max iterations: <b>%d.</b> </li>\n", N_ITERACTION);
+    fprintf(fp,
+            "</ul>\n"
+            "<h3>📈📉 Computations result:</h2>\n"
+            "<ul>\n");
+    fprintf(fp, "<li>🔬 Number of iterations: <b>%d.</b> </li>\n", n_itc);
+    fprintf(fp, "<li>⏲ Time: <b>%fms.</b></li>\n", time);
+    fprintf(fp,
+            "</ul>\n"
+            "<h3>Result matrix:</h3>\n"
+            "<table>\n<tr>\n");
     for (int i = 0; i < (SIZE * SIZE); i++) {
-        printCharHTML(fp, mat[i]);
+        printCharHTML(fp, r_mat[i]);
+        if (((i + 1) % (SIZE) == 0) && (i != 0)) {
+            fprintf(fp, "</tr>\n<tr>");
+            fflush(fp);
+        }
+    }
+    fprintf(fp,
+            "</ul>\n"
+            "<h3>Initial matrix:</h3>\n"
+            "<table>\n<tr>\n");
+    for (int i = 0; i < (SIZE * SIZE); i++) {
+        printCharHTML(fp, i_mat[i]);
         if (((i + 1) % (SIZE) == 0) && (i != 0)) {
             fprintf(fp, "</tr>\n<tr>");
             fflush(fp);
         }
     }
     fprintf(fp, "</table>\n</body>\n</html>");
-    fflush(fp);
 
     fclose(fp);
 }
@@ -476,7 +512,7 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 //#endregion
 
 //*#region Results management
-void gatherResult(Data data, int rank, char *mat) {
+void gatherResult(Data data, int rank, char *i_mat) {
     //Gather results and save them to a file
     char *section = malloc(sizeof(char) * data.sec_gt_size[rank]);
     int k = 0;
@@ -484,7 +520,7 @@ void gatherResult(Data data, int rank, char *mat) {
         section[k] = data.sub_mat[i];
         k++;
     }
-    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, i_mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
     free(section);
 }
@@ -494,7 +530,7 @@ void gatherResult(Data data, int rank, char *mat) {
 void main() {
     //Variable definitions
     int n_itc = N_ITERACTION;
-    char *mat;
+    char *i_mat, *r_mat;
     Data data;
 
     //MPI initialization
@@ -517,11 +553,11 @@ void main() {
     if (wd_size <= SIZE) {
         //Matrix generation
         if (rank == MASTER) {
-            mat = malloc(SIZE * SIZE * sizeof(char));
-            generateMat(mat);
-            //sampleMat(mat);
+            i_mat = malloc(SIZE * SIZE * sizeof(char));
+            generateMat(i_mat);
+            //sampleMat(i_mat);
             //printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            //printMat(mat);
+            //printMat(i_mat);
         }
 
         //Matrix division
@@ -531,7 +567,7 @@ void main() {
         data.sec_gt_disp = malloc(sizeof(int) * wd_size);
         calcSizes(wd_size, data);
         data.sub_mat = malloc(sizeof(char) * data.sec_size[rank]);
-        MPI_Scatterv(mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
+        MPI_Scatterv(i_mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
 
         //Start and finish calculation
         data.r_start = calcStart(rank, wd_size);
@@ -564,7 +600,8 @@ void main() {
         }
 
         //Creation of the results matrix
-        gatherResult(data, rank, mat);
+        if(rank == 0) r_mat = malloc(sizeof(char) * SIZE * SIZE);
+        gatherResult(data, rank, r_mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
@@ -577,14 +614,14 @@ void main() {
     if (wd_size <= SIZE) {
         if (rank == MASTER) {
             //Save result su file
-            printResultHTML(mat);
+            printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start);
 
             //printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
-            //printMat(mat);
+            //printMat(i_mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
-            printf("\n\n🕒 Time in ms = %f\n", end - start);
+            printf("\n\n🕒 Time in sec = %f\n", end - start);
 
-            free(mat);
+            free(i_mat);
         }
     } else if (rank == MASTER)
         printf("Qui Master 🧑‍🎓, computazione impossibile, numero di slave eccessivo. \n");
