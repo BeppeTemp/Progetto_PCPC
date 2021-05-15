@@ -6,8 +6,8 @@
 #include "mpi.h"
 
 //*#region Computation settings
-#define ROWS 2          //? Number of rows
-#define COLUMNS 2        //?Number of columns
+#define ROWS 100           //? Number of rows
+#define COLUMNS 100        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 33  //? Percentage of satisfaction required
@@ -102,9 +102,9 @@ void generateMat(char *i_mat) {
 void printChar(char x) {
     //Print a single agent
     if (x == 'O')
-        PRINT_GREEN(x);
-    if (x == 'X')
         PRINT_RED(x);
+    if (x == 'X')
+        PRINT_GREEN(x);
     if (x == ' ')
         printf("   ");
 }
@@ -115,6 +115,8 @@ void printMat(char *i_mat) {
         printf("|");
         printChar(i_mat[i]);
         if (((i + 1) % (COLUMNS) == 0) && (i != 0))
+            printf("|\n");
+        if ((ROWS * COLUMNS) == 1)
             printf("|\n");
     }
     printf("\n");
@@ -175,7 +177,7 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size)
             "<h3>📈📉 Computations result:</h3>\n"
             "<ul>\n");
     fprintf(fp, "<li>🔬 Number of iterations: <b>%d.</b> </li>\n", n_itc);
-    fprintf(fp, "<li>⏲ Time: <b>%fms.</b></li>\n", t);
+    fprintf(fp, "<li>⏲ Time: <b>%fs.</b></li>\n", t);
     fprintf(fp,
             "</ul>\n"
             "<h3>Here the master 🧑‍🎓! The resulting matrix is:</h3>\n"
@@ -436,11 +438,12 @@ int findMoves(Data data, Move *my_moves, int rank, int wd_size) {
     for (int i = data.r_start; i <= data.r_finish; i++) {
         if (data.sub_mat[i] != ' ')
             if (!calcSat(i, data, rank)) {
+                if (n_moves == 0) break;
                 my_moves[k].id_agent = data.my_emp_loc[k];
                 my_moves[k].id_reset = data.sec_disp[rank] + i;
                 my_moves[k].vl_agent = data.sub_mat[i];
                 is_over++;
-                if (--n_moves == 0) break;
+                n_moves--;
                 k++;
             }
     }
@@ -537,8 +540,6 @@ void main() {
             i_mat = malloc(ROWS * COLUMNS * sizeof(char));
             generateMat(i_mat);
             //sampleMat(i_mat);
-            printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            printMat(i_mat);
         }
 
         //Matrix division
@@ -597,13 +598,17 @@ void main() {
             //Save result su file
             printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
 
-            printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+            printf("🔬 Number of iterations: %d.\n", N_ITERACTION - n_itc);
+            printf("⏲  Time: %fs.\n\n", end - start);
+
+            printf("Here the master 🧑‍🎓! The resulting matrix is: \n");
             printMat(r_mat);
-            printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
-            printf("\n\n🕒 Time in sec = %f\n", end - start);
+            printf("And this is the initial matrix, bye-bye 👋: \n");
+            printMat(i_mat);
+            if (ROWS * COLUMNS >= 20000) printf("Why are you so evil? 😭\n");
 
             free(i_mat);
         }
     } else if (rank == MASTER)
-        printf("Qui Master 🧑‍🎓, computazione impossibile, numero di slave eccessivo. \n");
+        printf("Here the master 🧑‍🎓! computation impossible, excessive number of slaves. \n");
 }
