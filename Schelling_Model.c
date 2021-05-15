@@ -6,7 +6,8 @@
 #include "mpi.h"
 
 //*#region Computation settings
-#define SIZE 20           //? Size of matrix
+#define ROWS 20          //? Number of rows
+#define COLUMNS 20       //?Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 33  //? Percentage of satisfaction required
@@ -59,33 +60,21 @@ void sampleMat(char *i_mat) {
     //Fills the matrix with a constant set of values
     i_mat[0] = 'X';
     i_mat[1] = 'X';
-    i_mat[2] = 'O';
+    i_mat[2] = ' ';
     i_mat[3] = ' ';
     i_mat[4] = 'X';
 
-    i_mat[5] = 'O';
-    i_mat[6] = 'O';
-    i_mat[7] = 'O';
-    i_mat[8] = 'O';
+    i_mat[5] = ' ';
+    i_mat[6] = ' ';
+    i_mat[7] = ' ';
+    i_mat[8] = ' ';
     i_mat[9] = ' ';
 
     i_mat[10] = 'X';
     i_mat[11] = 'X';
-    i_mat[12] = 'O';
+    i_mat[12] = ' ';
     i_mat[13] = 'O';
     i_mat[14] = ' ';
-
-    i_mat[15] = 'X';
-    i_mat[16] = 'X';
-    i_mat[17] = 'O';
-    i_mat[18] = 'X';
-    i_mat[19] = 'X';
-
-    i_mat[20] = ' ';
-    i_mat[21] = 'X';
-    i_mat[22] = ' ';
-    i_mat[23] = ' ';
-    i_mat[24] = 'X';
 }
 void syncProcess(unsigned int rank) {
     //Inserts delays in computation to synchronize the processes
@@ -117,7 +106,7 @@ char randomValue() {
 void generateMat(char *i_mat) {
     //Randomly fills the matrix
     srand(time(NULL) + MASTER);
-    for (int i = 0; i < (SIZE * SIZE); i++)
+    for (int i = 0; i < (ROWS * COLUMNS); i++)
         i_mat[i] = randomValue();
 }
 //#endregion
@@ -135,25 +124,27 @@ void printChar(char x) {
 void printMat(char *i_mat) {
     //Print the entire matrix
     printf("\n");
-    for (int i = 0; i < (SIZE * SIZE); i++) {
+    for (int i = 0; i < (ROWS * COLUMNS); i++) {
         printf("|");
         printChar(i_mat[i]);
-        if (((i + 1) % (SIZE) == 0) && (i != 0))
+        if (((i + 1) % (COLUMNS) == 0) && (i != 0))
             printf("|\n");
     }
     printf("\n");
 }
 void printCharHTML(FILE *fp, char x) {
     if (x == 'O')
-        fprintf(fp, "<th class=\"green\">%c</th>\n", x);
-    if (x == 'X')
         fprintf(fp, "<th class=\"red\">%c</th>\n", x);
+    if (x == 'X')
+        fprintf(fp, "<th class=\"green\">%c</th>\n", x);
     if (x == ' ')
-        fprintf(fp, "<th></th>\n");
+        fprintf(fp, "<th>&nbsp; &nbsp;</th>\n");
 }
-void printResultHTML(char *i_mat, char *r_mat, int n_itc, double time) {
+void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
     //Print the entire matrix on file
     FILE *fp;
+    time_t curtime;
+    time(&curtime);
     fp = fopen("result.html", "w+");
     fprintf(fp,
             "<html>\n<head>\n<style>\n"
@@ -170,18 +161,20 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double time) {
             "padding-left: 5px;\n"
             "padding-right: 5px;\n"
             "}\n"
-            ".green { color: green; }\n"
+            ".green { color: rgb(0, 255, 0); }\n"
             ".red { color: red; }\n"
             "</style>\n</head>\n<body>\n"
-            "<h1>Shelling model computation result</h1>\n"
-            "<h3>⚙ Computation settings:</h2>\n"
+            "<h1>Schelling's model of segregation</h1>\n");
+    fprintf(fp, "<h3>📆 %s</h3>\n", ctime(&curtime));
+    fprintf(fp,
+            "<h3>⚙ Computation settings:</h3>\n"
             "<ul>\n");
-    fprintf(fp, "<li>📏 Row: <b>%d.</b></li>\n", SIZE);
-    fprintf(fp, "<li>📐 Collumn: <b>%d.</b></li>\n", SIZE);
+    fprintf(fp, "<li>📏 Rows: <b>%d.</b></li>\n", ROWS);
+    fprintf(fp, "<li>📐 Collumns: <b>%d.</b></li>\n", COLUMNS);
     fprintf(fp, "<p></p>\n");
-    fprintf(fp, "<li>❎ population: <b>%d%%.</b></li>\n", X_PERCENTAGE);
-    fprintf(fp, "<li>⭕ population: <b>%d%%.</b></li>\n", O_PERCENTAGE);
-    fprintf(fp, "<li>🤷‍♂️ empty slots: <b>%d%%.</b></li>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
+    fprintf(fp, "<li>❎ Population: <b>%d%%.</b></li>\n", X_PERCENTAGE);
+    fprintf(fp, "<li>⭕ Population: <b>%d%%.</b></li>\n", O_PERCENTAGE);
+    fprintf(fp, "<li>🤷‍♂️ Empty slots: <b>%d%%.</b></li>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
     fprintf(fp, "<p></p>\n");
     fprintf(fp, "<li>😎 Satisfaction threshold: <b>%d%%.</b></li>\n", SAT_THRESHOLD);
     fprintf(fp, "<li>📟 Empty slot assigment seed: <b>%d.</b></li>\n", ASSIGN_SEED);
@@ -191,31 +184,32 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double time) {
             "<h3>📈📉 Computations result:</h2>\n"
             "<ul>\n");
     fprintf(fp, "<li>🔬 Number of iterations: <b>%d.</b> </li>\n", n_itc);
-    fprintf(fp, "<li>⏲ Time: <b>%fms.</b></li>\n", time);
+    fprintf(fp, "<li>⏲ Time: <b>%fms.</b></li>\n", t);
     fprintf(fp,
             "</ul>\n"
-            "<h3>Result matrix:</h3>\n"
+            "<h3>Here the master 🧑‍🎓! The resulting matrix is:</h3>\n"
             "<table>\n<tr>\n");
-    for (int i = 0; i < (SIZE * SIZE); i++) {
+    for (int i = 0; i < (ROWS * COLUMNS); i++) {
         printCharHTML(fp, r_mat[i]);
-        if (((i + 1) % (SIZE) == 0) && (i != 0)) {
+        if (i == (ROWS * COLUMNS) - 1)
+            fprintf(fp, "</tr>\n</table>\n");
+        else if (((i + 1) % (COLUMNS) == 0) && (i != 0))
             fprintf(fp, "</tr>\n<tr>");
-            fflush(fp);
-        }
     }
     fprintf(fp,
             "</ul>\n"
-            "<h3>Initial matrix:</h3>\n"
+            "<h3>And this is the initial matrix, bye-bye 👋❤️:</h3>\n"
             "<table>\n<tr>\n");
-    for (int i = 0; i < (SIZE * SIZE); i++) {
+    for (int i = 0; i < (ROWS * COLUMNS); i++) {
         printCharHTML(fp, i_mat[i]);
-        if (((i + 1) % (SIZE) == 0) && (i != 0)) {
+        if (i == (ROWS * COLUMNS) - 1)
+            fprintf(fp, "</tr>\n</table>\n");
+        else if (((i + 1) % (COLUMNS) == 0) && (i != 0))
             fprintf(fp, "</tr>\n<tr>");
-            fflush(fp);
-        }
     }
-    fprintf(fp, "</table>\n</body>\n</html>");
-
+    fprintf(fp, "</table>\n");
+    if (ROWS * COLUMNS >= 20000) fprintf(fp, "<h3>Why are you so evil? 😭</h3>\n");
+    fprintf(fp, "</body>\n</html>");
     fclose(fp);
 }
 //#endregion
@@ -223,21 +217,21 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double time) {
 //*#region Functions for dividing the matrix between processes
 void calcSizes(int wd_size, Data data) {
     //Calculate section sizes and displacements for gather and scatter operations
-    int section = SIZE / (wd_size);
-    int difference = SIZE % (wd_size);
+    int section = ROWS / (wd_size);
+    int difference = ROWS % (wd_size);
 
     for (int i = 0; i < wd_size; i++) {
-        data.sec_size[i] = i < difference ? (section + 1) * SIZE : section * SIZE;
+        data.sec_size[i] = i < difference ? (section + 1) * COLUMNS : section * COLUMNS;
         data.sec_gt_size[i] = data.sec_size[i];
         data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
-        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? SIZE : SIZE * 2;
+        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMNS : COLUMNS * 2;
 
         if (i == 0) {
             data.sec_disp[i] = 0;
         } else if (i == wd_size - 1)
-            data.sec_disp[i] = (SIZE * SIZE) - data.sec_size[i];
+            data.sec_disp[i] = (ROWS * COLUMNS) - data.sec_size[i];
         else {
-            data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (SIZE * 2);
+            data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (COLUMNS * 2);
         }
     }
 }
@@ -246,24 +240,22 @@ int calcStart(int rank, int wd_size) {
     if (rank == 0)
         return 0;
     else
-        return SIZE;
+        return COLUMNS;
 }
 int calcFinish(Data data, int rank, int wd_size) {
     //Calculate finish position of real submatrix
-    if (rank == 0)
-        return data.sec_size[rank] - SIZE - 1;
-    else if (rank == wd_size - 1)
+    if (rank == wd_size - 1)
         return data.sec_size[rank] - 1;
     else
-        return data.sec_size[rank] - SIZE - 1;
+        return data.sec_size[rank] - COLUMNS - 1;
 }
 //#endregion
 
 //*#region Functions for calculating the degree of satisfaction
-void convertIndex(int id, int *row_index, int *col_index) {
+void convertIndex(int id, int *rowS_index, int *col_index) {
     //Converts the index of a vector to its matrix counterpart
-    *row_index = id / SIZE;
-    *col_index = id % SIZE;
+    *rowS_index = id / COLUMNS;
+    *col_index = id % COLUMNS;
 }
 int isMyKind(int my_index, int x_index, Data data) {
     //Check if two agents are of the same type
@@ -276,26 +268,26 @@ void satCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
         //Top left corner
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE), data);
-            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS), data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
             break;
         //Top right corner
         case 1:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE), data);
-            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS), data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
             break;
         //Bottom left corner
         case 2:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE), data);
-            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS), data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
             break;
         //Bottom right corner
         case 3:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE), data);
-            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS), data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
     }
 }
@@ -307,33 +299,33 @@ void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
         case 0:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE), data);
-            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS), data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
             break;
         //Left edge
         case 1:
             *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE), data);
-            *my_kynd += isMyKind(id, (id - SIZE), data);
-            *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS), data);
+            *my_kynd += isMyKind(id, (id - COLUMNS), data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
             break;
         //Right edge
         case 2:
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + SIZE), data);
-            *my_kynd += isMyKind(id, (id - SIZE), data);
-            *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id + COLUMNS), data);
+            *my_kynd += isMyKind(id, (id - COLUMNS), data);
+            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
         //Bottom edge
         case 3:
             *my_kynd += isMyKind(id, id + 1, data);
             *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE), data);
-            *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
-            *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS), data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
+            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
     }
 }
@@ -342,41 +334,41 @@ void satCenter(int id, Data data, int *neigh, int *my_kynd) {
     *neigh += 8;
     *my_kynd += isMyKind(id, id + 1, data);
     *my_kynd += isMyKind(id, id - 1, data);
-    *my_kynd += isMyKind(id, (id - SIZE), data);
-    *my_kynd += isMyKind(id, (id + SIZE), data);
-    *my_kynd += isMyKind(id, (id - SIZE) + 1, data);
-    *my_kynd += isMyKind(id, (id - SIZE) - 1, data);
-    *my_kynd += isMyKind(id, (id + SIZE) + 1, data);
-    *my_kynd += isMyKind(id, (id + SIZE) - 1, data);
+    *my_kynd += isMyKind(id, (id - COLUMNS), data);
+    *my_kynd += isMyKind(id, (id + COLUMNS), data);
+    *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
+    *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
+    *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
+    *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
 }
 int calcSat(int id, Data data, int rank) {
     //Calculate the satisfaction of an agent
     int neigh = 0, my_kynd = 0;
-    int row = data.sec_size[rank] / SIZE;
-    int row_index, col_index;
+    int rowS = data.sec_size[rank] / COLUMNS;
+    int rowS_index, col_index;
 
-    convertIndex(id, &row_index, &col_index);
+    convertIndex(id, &rowS_index, &col_index);
 
-    if (row_index == 0)
+    if (rowS_index == 0)
         if (col_index == 0)
             satCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
-        else if (col_index == SIZE - 1)
+        else if (col_index == COLUMNS - 1)
             satCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
         else
             satEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
 
-    else if (row_index == row - 1)
+    else if (rowS_index == rowS - 1)
         if (col_index == 0)
             satCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
-        else if (col_index == SIZE - 1)
+        else if (col_index == COLUMNS - 1)
             satCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
         else
             satEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
 
-    else if (col_index == 0 && row_index > 0 && row_index < row - 1)
+    else if (col_index == 0 && rowS_index > 0 && rowS_index < rowS - 1)
         satEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
 
-    else if (col_index == SIZE - 1 && row_index > 0 && row_index < row)
+    else if (col_index == COLUMNS - 1 && rowS_index > 0 && rowS_index < rowS)
         satEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
     else
         satCenter(id, data, &neigh, &my_kynd);  //Center
@@ -550,14 +542,14 @@ void main() {
     MPI_Type_create_struct(2, blockcounts, offsets, oldtypes, &move_data_type);
     MPI_Type_commit(&move_data_type);
 
-    if (wd_size <= SIZE) {
+    if (wd_size <= ROWS) {
         //Matrix generation
         if (rank == MASTER) {
-            i_mat = malloc(SIZE * SIZE * sizeof(char));
+            i_mat = malloc(ROWS * COLUMNS * sizeof(char));
             generateMat(i_mat);
             //sampleMat(i_mat);
-            //printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
-            //printMat(i_mat);
+            printf("Qui Master 🧑‍🎓, la matrice generata è: \n");
+            printMat(i_mat);
         }
 
         //Matrix division
@@ -573,7 +565,7 @@ void main() {
         data.r_start = calcStart(rank, wd_size);
         data.r_finish = calcFinish(data, rank, wd_size);
 
-        data.my_emp_loc = malloc(sizeof(int) * SIZE * SIZE);
+        data.my_emp_loc = malloc(sizeof(int) * ROWS * COLUMNS);
 
         //Start computation
         MPI_Barrier(MPI_COMM_WORLD);
@@ -600,7 +592,7 @@ void main() {
         }
 
         //Creation of the results matrix
-        if(rank == 0) r_mat = malloc(sizeof(char) * SIZE * SIZE);
+        if (rank == 0) r_mat = malloc(sizeof(char) * ROWS * COLUMNS);
         gatherResult(data, rank, r_mat);
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -611,13 +603,13 @@ void main() {
     MPI_Finalize();
 
     //Results display
-    if (wd_size <= SIZE) {
+    if (wd_size <= ROWS) {
         if (rank == MASTER) {
             //Save result su file
             printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start);
 
-            //printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
-            //printMat(i_mat);
+            printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
+            printMat(r_mat);
             printf("Iterazioni effettuate: %d\n", N_ITERACTION - n_itc);
             printf("\n\n🕒 Time in sec = %f\n", end - start);
 

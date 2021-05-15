@@ -14,20 +14,22 @@ border-width: 2px;
 padding-left: 5px;
 padding-right: 5px;
 }
-.green { color: green; }
+.green { color: rgb(0, 255, 0); }
 .red { color: red; }
 </style>
 </head>
 <body>
-<h1>Shelling model computation result</h1>
-<h3>⚙ Computation settings:</h2>
+<h1>Schelling's model of segregation</h1>
+<h3>📆 Sat May 15 08:24:39 2021
+</h3>
+<h3>⚙ Computation settings:</h3>
 <ul>
-<li>📏 Row: <b>10.</b></li>
-<li>📐 Collumn: <b>10.</b></li>
+<li>📏 Rows: <b>20.</b></li>
+<li>📐 Collumns: <b>20.</b></li>
 <p></p>
-<li>❎ population: <b>33%.</b></li>
-<li>⭕ population: <b>33%.</b></li>
-<li>🤷‍♂️ empty slots: <b>34%.</b></li>
+<li>❎ Population: <b>33%.</b></li>
+<li>⭕ Population: <b>33%.</b></li>
+<li>🤷‍♂️ Empty slots: <b>34%.</b></li>
 <p></p>
 <li>😎 Satisfaction threshold: <b>33%.</b></li>
 <li>📟 Empty slot assigment seed: <b>10.</b></li>
@@ -35,236 +37,858 @@ padding-right: 5px;
 </ul>
 <h3>📈📉 Computations result:</h2>
 <ul>
-<li>🔬 Number of iterations: <b>12.</b> </li>
-<li>⏲ Time: <b>0.000452sec.</b></li>
+<li>🔬 Number of iterations: <b>20.</b> </li>
+<li>⏲ Time: <b>0.000569ms.</b></li>
 </ul>
-<h3>Result matrix:</h3>
+<h3>Here the master 🧑‍🎓! The resulting matrix is:</h3>
 <table>
 <tr>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
 </tr>
-<tr><th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
 </tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr></ul>
-<h3>Initial matrix:</h3>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+</table>
+</ul>
+<h3>And this is the initial matrix, bye-bye 👋❤️:</h3>
 <table>
 <tr>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
+<tr><th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
+<tr><th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
-<th></th>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
 </tr>
-<tr><th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
-<th></th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
 </tr>
-<tr><th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="green">O</th>
-<th class="red">X</th>
-<th></th>
-<th class="red">X</th>
-<th class="red">X</th>
+<tr><th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
 </tr>
-<tr><th></th>
-<th class="red">X</th>
-<th class="red">X</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="green">O</th>
-<th class="green">O</th>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr><th class="red">X</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th></th>
-<th class="green">O</th>
-<th></th>
-<th></th>
-<th class="red">X</th>
-<th class="green">O</th>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
 </tr>
-<tr></table>
+<tr><th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+</tr>
+<tr><th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+</tr>
+<tr><th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+</tr>
+<tr><th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th>&nbsp; &nbsp;</th>
+<th>&nbsp; &nbsp;</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="green">X</th>
+<th>&nbsp; &nbsp;</th>
+<th class="red">O</th>
+<th class="red">O</th>
+<th class="green">X</th>
+</tr>
+</table>
+</table>
 </body>
 </html>
