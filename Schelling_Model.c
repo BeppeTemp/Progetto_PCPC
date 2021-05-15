@@ -6,8 +6,8 @@
 #include "mpi.h"
 
 //*#region Computation settings
-#define ROWS 20          //? Number of rows
-#define COLUMNS 20       //?Number of columns
+#define ROWS 2          //? Number of rows
+#define COLUMNS 2        //?Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 33  //? Percentage of satisfaction required
@@ -58,23 +58,10 @@ typedef struct Move {
 //!#region Debug functions
 void sampleMat(char *i_mat) {
     //Fills the matrix with a constant set of values
-    i_mat[0] = 'X';
-    i_mat[1] = 'X';
-    i_mat[2] = ' ';
+    i_mat[0] = 'O';
+    i_mat[1] = 'O';
+    i_mat[2] = 'X';
     i_mat[3] = ' ';
-    i_mat[4] = 'X';
-
-    i_mat[5] = ' ';
-    i_mat[6] = ' ';
-    i_mat[7] = ' ';
-    i_mat[8] = ' ';
-    i_mat[9] = ' ';
-
-    i_mat[10] = 'X';
-    i_mat[11] = 'X';
-    i_mat[12] = ' ';
-    i_mat[13] = 'O';
-    i_mat[14] = ' ';
 }
 void syncProcess(unsigned int rank) {
     //Inserts delays in computation to synchronize the processes
@@ -138,9 +125,9 @@ void printCharHTML(FILE *fp, char x) {
     if (x == 'X')
         fprintf(fp, "<th class=\"green\">%c</th>\n", x);
     if (x == ' ')
-        fprintf(fp, "<th>&nbsp; &nbsp;</th>\n");
+        fprintf(fp, "<th class=\"null\">N</th>\n");
 }
-void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
+void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size) {
     //Print the entire matrix on file
     FILE *fp;
     time_t curtime;
@@ -149,11 +136,13 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
     fprintf(fp,
             "<html>\n<head>\n<style>\n"
             "body {\n"
-            "font-family: 'Segoe UI', monospace;\n"
+            "font-family: monospace;\n"
+            "font-size: 18px;\n"
             "color: rgb(190, 190, 190);\n"
             "background-color: #1c1f24;\n"
             "}\n"
             "table, th {\n"
+            "width: max-content;\n"
             "border-collapse: collapse;\n"
             "border-style: inset;\n"
             "border-color: rgb(83, 83, 83);\n"
@@ -163,6 +152,7 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
             "}\n"
             ".green { color: rgb(0, 255, 0); }\n"
             ".red { color: red; }\n"
+            ".null{ color:rgba(255, 255, 255, 0)}\n"
             "</style>\n</head>\n<body>\n"
             "<h1>Schelling's model of segregation</h1>\n");
     fprintf(fp, "<h3>📆 %s</h3>\n", ctime(&curtime));
@@ -175,13 +165,14 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
     fprintf(fp, "<li>❎ Population: <b>%d%%.</b></li>\n", X_PERCENTAGE);
     fprintf(fp, "<li>⭕ Population: <b>%d%%.</b></li>\n", O_PERCENTAGE);
     fprintf(fp, "<li>🤷‍♂️ Empty slots: <b>%d%%.</b></li>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
+    fprintf(fp, "<li>👨‍👦‍👦 Number of processes: <b>%d.</b></li>\n", wd_size);
     fprintf(fp, "<p></p>\n");
     fprintf(fp, "<li>😎 Satisfaction threshold: <b>%d%%.</b></li>\n", SAT_THRESHOLD);
     fprintf(fp, "<li>📟 Empty slot assigment seed: <b>%d.</b></li>\n", ASSIGN_SEED);
     fprintf(fp, "<li>🚀 Max iterations: <b>%d.</b> </li>\n", N_ITERACTION);
     fprintf(fp,
             "</ul>\n"
-            "<h3>📈📉 Computations result:</h2>\n"
+            "<h3>📈📉 Computations result:</h3>\n"
             "<ul>\n");
     fprintf(fp, "<li>🔬 Number of iterations: <b>%d.</b> </li>\n", n_itc);
     fprintf(fp, "<li>⏲ Time: <b>%fms.</b></li>\n", t);
@@ -197,7 +188,6 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
             fprintf(fp, "</tr>\n<tr>");
     }
     fprintf(fp,
-            "</ul>\n"
             "<h3>And this is the initial matrix, bye-bye 👋❤️:</h3>\n"
             "<table>\n<tr>\n");
     for (int i = 0; i < (ROWS * COLUMNS); i++) {
@@ -207,7 +197,6 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t) {
         else if (((i + 1) % (COLUMNS) == 0) && (i != 0))
             fprintf(fp, "</tr>\n<tr>");
     }
-    fprintf(fp, "</table>\n");
     if (ROWS * COLUMNS >= 20000) fprintf(fp, "<h3>Why are you so evil? 😭</h3>\n");
     fprintf(fp, "</body>\n</html>");
     fclose(fp);
@@ -606,7 +595,7 @@ void main() {
     if (wd_size <= ROWS) {
         if (rank == MASTER) {
             //Save result su file
-            printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start);
+            printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
 
             printf("Qui Master 🧑‍🎓, la matrice elaborata è: \n");
             printMat(r_mat);
