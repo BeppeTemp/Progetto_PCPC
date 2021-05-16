@@ -5,9 +5,11 @@
 
 #include "mpi.h"
 
+#define OUTPUT_TYPE 1  //? 0 HTML output, 1 CLI output
+
 //*#region Computation settings
-#define ROWS 100           //? Number of rows
-#define COLUMNS 100        //? Number of columns
+#define ROWS 10         //? Number of rows
+#define COLUMNS 10       //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 33  //? Percentage of satisfaction required
@@ -537,6 +539,7 @@ void main() {
     if (wd_size <= ROWS) {
         //Matrix generation
         if (rank == MASTER) {
+            printf("Computation started... \n");
             i_mat = malloc(ROWS * COLUMNS * sizeof(char));
             generateMat(i_mat);
             //sampleMat(i_mat);
@@ -595,18 +598,19 @@ void main() {
     //Results display
     if (wd_size <= ROWS) {
         if (rank == MASTER) {
-            //Save result su file
-            printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
+            printf("Computation finished. \n\n");
+            if (OUTPUT_TYPE == 0) {
+                printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
+            } else {
+                printf("🔬 Number of iterations: %d.\n", N_ITERACTION - n_itc);
+                printf("⏲  Time: %fs.\n\n", end - start);
 
-            printf("🔬 Number of iterations: %d.\n", N_ITERACTION - n_itc);
-            printf("⏲  Time: %fs.\n\n", end - start);
-
-            printf("Here the master 🧑‍🎓! The resulting matrix is: \n");
-            printMat(r_mat);
-            printf("And this is the initial matrix, bye-bye 👋: \n");
-            printMat(i_mat);
-            if (ROWS * COLUMNS >= 20000) printf("Why are you so evil? 😭\n");
-
+                printf("Here the master 🧑‍🎓! The resulting matrix is: \n");
+                printMat(r_mat);
+                printf("And this is the initial matrix, bye-bye 👋: \n");
+                printMat(i_mat);
+                if (ROWS * COLUMNS >= 20000) printf("Why are you so evil? 😭\n");
+            }
             free(i_mat);
         }
     } else if (rank == MASTER)
