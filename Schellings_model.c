@@ -5,14 +5,15 @@
 
 #include "mpi.h"
 
-#define OUTPUT_TYPE 1  //? 0 HTML output, 1 CLI output
+//* Outuput type
+#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output
 
 //*#region Computation settings
-#define ROWS 1         //? Number of rows
-#define COLUMNS 10       //? Number of columns
+#define ROWS 50           //? Number of rows
+#define COLUMNS 50        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
-#define SAT_THRESHOLD 33  //? Percentage of satisfaction required
+#define SAT_THRESHOLD 35  //? Percentage of satisfaction required
 #define N_ITERACTION 100  //? Number of iteration calculated
 #define ASSIGN_SEED 10    //? Seed for free location assignment
 //#endregion
@@ -120,6 +121,8 @@ void printMat(char *i_mat) {
             printf("|\n");
         if ((ROWS * COLUMNS) == 1)
             printf("|\n");
+        if (COLUMNS == 1 && ((i == 0)))
+            printf("|\n");
     }
     printf("\n");
 }
@@ -140,19 +143,25 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size)
     fprintf(fp,
             "<html>\n<head>\n<style>\n"
             "body {\n"
+            "text-align: center;\n"
             "font-family: monospace;\n"
             "font-size: 18px;\n"
             "color: rgb(190, 190, 190);\n"
             "background-color: #1c1f24;\n"
             "}\n"
-            "table, th {\n"
-            "width: max-content;\n"
-            "border-collapse: collapse;\n"
-            "border-style: inset;\n"
+            "table {\n"
+            "border-style: solid;\n"
             "border-color: rgb(83, 83, 83);\n"
             "border-width: 2px;\n"
-            "padding-left: 5px;\n"
-            "padding-right: 5px;\n"
+            "margin-left: auto;\n"
+            "margin-right: auto;\n"
+            "}\n"
+            "th {\n"
+            "font-size: 8px;\n"
+            "width: max-content;\n"
+            "border-collapse: collapse;\n"
+            "padding-left: 3px;\n"
+            "padding-right: 3px;\n"
             "}\n"
             ".green { color: rgb(0, 255, 0); }\n"
             ".red { color: red; }\n"
@@ -160,28 +169,22 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size)
             "</style>\n</head>\n<body>\n"
             "<h1>Schelling's model of segregation</h1>\n");
     fprintf(fp, "<h3>📆 %s</h3>\n", ctime(&curtime));
-    fprintf(fp,
-            "<h3>⚙ Computation settings:</h3>\n"
-            "<ul>\n");
-    fprintf(fp, "<li>📏 Rows: <b>%d.</b></li>\n", ROWS);
-    fprintf(fp, "<li>📐 Collumns: <b>%d.</b></li>\n", COLUMNS);
+    fprintf(fp, "<h3>⚙ Computation settings:</h3>\n");
+    fprintf(fp, "📏 Rows: <b>%d.</b><br>\n", ROWS);
+    fprintf(fp, "📐 Collumns: <b>%d.</b><br>\n", COLUMNS);
     fprintf(fp, "<p></p>\n");
-    fprintf(fp, "<li>❎ Population: <b>%d%%.</b></li>\n", X_PERCENTAGE);
-    fprintf(fp, "<li>⭕ Population: <b>%d%%.</b></li>\n", O_PERCENTAGE);
-    fprintf(fp, "<li>🤷‍♂️ Empty slots: <b>%d%%.</b></li>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
-    fprintf(fp, "<li>👨‍👦‍👦 Number of processes: <b>%d.</b></li>\n", wd_size);
+    fprintf(fp, "❎ Population: <b>%d%%.</b><br>\n", X_PERCENTAGE);
+    fprintf(fp, "⭕ Population: <b>%d%%.</b><br>\n", O_PERCENTAGE);
+    fprintf(fp, "🤷‍♂️ Empty slots: <b>%d%%.</b><br>\n", 100 - X_PERCENTAGE - O_PERCENTAGE);
+    fprintf(fp, "👨‍👦‍👦 Number of processes: <b>%d.</b><br>\n", wd_size);
     fprintf(fp, "<p></p>\n");
-    fprintf(fp, "<li>😎 Satisfaction threshold: <b>%d%%.</b></li>\n", SAT_THRESHOLD);
-    fprintf(fp, "<li>📟 Empty slot assigment seed: <b>%d.</b></li>\n", ASSIGN_SEED);
-    fprintf(fp, "<li>🚀 Max iterations: <b>%d.</b> </li>\n", N_ITERACTION);
+    fprintf(fp, "😎 Satisfaction threshold: <b>%d%%.</b><br>\n", SAT_THRESHOLD);
+    fprintf(fp, "📟 Empty slot assigment seed: <b>%d.</b><br>\n", ASSIGN_SEED);
+    fprintf(fp, "🚀 Max iterations: <b>%d.</b> <br>\n", N_ITERACTION);
+    fprintf(fp, "<h3>📈📉 Computations result:</h3>\n");
+    fprintf(fp, "🔬 Number of iterations: <b>%d.</b> <br>\n", n_itc);
+    fprintf(fp, "⏲ Time: <b>%fs.</b><br>\n", t);
     fprintf(fp,
-            "</ul>\n"
-            "<h3>📈📉 Computations result:</h3>\n"
-            "<ul>\n");
-    fprintf(fp, "<li>🔬 Number of iterations: <b>%d.</b> </li>\n", n_itc);
-    fprintf(fp, "<li>⏲ Time: <b>%fs.</b></li>\n", t);
-    fprintf(fp,
-            "</ul>\n"
             "<h3>Here the master 🧑‍🎓! The resulting matrix is:</h3>\n"
             "<table>\n<tr>\n");
     for (int i = 0; i < (ROWS * COLUMNS); i++) {
@@ -189,6 +192,8 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size)
         if (i == (ROWS * COLUMNS) - 1)
             fprintf(fp, "</tr>\n</table>\n");
         else if (((i + 1) % (COLUMNS) == 0) && (i != 0))
+            fprintf(fp, "</tr>\n<tr>");
+        else if (COLUMNS == 1 && ((i == 0)))
             fprintf(fp, "</tr>\n<tr>");
     }
     fprintf(fp,
@@ -199,6 +204,8 @@ void printResultHTML(char *i_mat, char *r_mat, int n_itc, double t, int wd_size)
         if (i == (ROWS * COLUMNS) - 1)
             fprintf(fp, "</tr>\n</table>\n");
         else if (((i + 1) % (COLUMNS) == 0) && (i != 0))
+            fprintf(fp, "</tr>\n<tr>");
+        else if (COLUMNS == 1 && ((i == 0)))
             fprintf(fp, "</tr>\n<tr>");
     }
     if (ROWS * COLUMNS >= 20000) fprintf(fp, "<h3>Why are you so evil? 😭</h3>\n");
@@ -213,19 +220,24 @@ void calcSizes(int wd_size, Data data) {
     int section = ROWS / (wd_size);
     int difference = ROWS % (wd_size);
 
-    for (int i = 0; i < wd_size; i++) {
-        data.sec_size[i] = i < difference ? (section + 1) * COLUMNS : section * COLUMNS;
-        data.sec_gt_size[i] = data.sec_size[i];
-        data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
-        data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMNS : COLUMNS * 2;
+    if (wd_size >= 2)
+        for (int i = 0; i < wd_size; i++) {
+            data.sec_size[i] = i < difference ? (section + 1) * COLUMNS : section * COLUMNS;
+            data.sec_gt_size[i] = data.sec_size[i];
+            data.sec_gt_disp[i] = i == 0 ? 0 : data.sec_gt_disp[i - 1] + data.sec_gt_size[i - 1];
+            data.sec_size[i] += ((i == 0) || (i == wd_size - 1)) ? COLUMNS : COLUMNS * 2;
 
-        if (i == 0) {
-            data.sec_disp[i] = 0;
-        } else if (i == wd_size - 1)
-            data.sec_disp[i] = (ROWS * COLUMNS) - data.sec_size[i];
-        else {
-            data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (COLUMNS * 2);
+            if (i == 0) {
+                data.sec_disp[i] = 0;
+            } else if (i == wd_size - 1)
+                data.sec_disp[i] = (ROWS * COLUMNS) - data.sec_size[i];
+            else {
+                data.sec_disp[i] = data.sec_disp[i - 1] + data.sec_size[i - 1] - (COLUMNS * 2);
+            }
         }
+    else {
+        data.sec_size[0] = ROWS * COLUMNS;
+        data.sec_disp[0] = 0;
     }
 }
 int calcStart(int rank, int wd_size) {
@@ -539,7 +551,7 @@ void main() {
     if (wd_size <= ROWS) {
         //Matrix generation
         if (rank == MASTER) {
-            printf("Computation started... \n");
+            printf("Computation \033[0;33mstarted...\x1b[0m \n");
             i_mat = malloc(ROWS * COLUMNS * sizeof(char));
             generateMat(i_mat);
             //sampleMat(i_mat);
@@ -586,7 +598,10 @@ void main() {
 
         //Creation of the results matrix
         if (rank == 0) r_mat = malloc(sizeof(char) * ROWS * COLUMNS);
-        gatherResult(data, rank, r_mat);
+        if (wd_size >= 2)
+            gatherResult(data, rank, r_mat);
+        else
+            r_mat = data.sub_mat;
 
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
@@ -598,7 +613,7 @@ void main() {
     //Results display
     if (wd_size <= ROWS) {
         if (rank == MASTER) {
-            printf("Computation finished. \n\n");
+            printf("Computation \x1b[32mfinished.\x1b[0m \n\n ");
             if (OUTPUT_TYPE == 0) {
                 printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
             } else {
@@ -614,5 +629,5 @@ void main() {
             free(i_mat);
         }
     } else if (rank == MASTER)
-        printf("Here the master 🧑‍🎓! computation impossible, excessive number of slaves. \n");
+        printf("Here the master 🧑‍🎓! \x1b[31mcomputation impossible\x1b[0m, excessive number of slaves. \n");
 }
