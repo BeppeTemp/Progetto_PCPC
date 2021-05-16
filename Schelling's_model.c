@@ -8,7 +8,7 @@
 #define OUTPUT_TYPE 1  //? 0 HTML output, 1 CLI output
 
 //*#region Computation settings
-#define ROWS 10         //? Number of rows
+#define ROWS 1         //? Number of rows
 #define COLUMNS 10       //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents

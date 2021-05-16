@@ -1,2 +1,2 @@
-# Progetto_PCPC
- Repo progetto PCPC
+# Schelling's model of segregation
+Implementazione
