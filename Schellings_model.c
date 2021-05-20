@@ -6,11 +6,11 @@
 #include "mpi.h"
 
 //* Outuput type
-#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output
+#define OUTPUT_TYPE 2  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define ROWS 50           //? Number of rows
-#define COLUMNS 50        //? Number of columns
+#define ROWS 20000           //? Number of rows
+#define COLUMNS 7000        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
@@ -612,21 +612,31 @@ void main() {
 
     //Results display
     if (wd_size <= ROWS) {
+        free(data.sec_size);
+        free(data.sec_disp);
+        free(data.sec_gt_size);
+        free(data.sec_gt_disp);
+        free(data.sub_mat);
+        free(data.my_emp_loc);
+
         if (rank == MASTER) {
-            printf("Computation \x1b[32mfinished.\x1b[0m \n\n ");
+            printf("Computation \x1b[32mfinished.\x1b[0m \n\n");
             if (OUTPUT_TYPE == 0) {
                 printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
             } else {
                 printf("🔬 Number of iterations: %d.\n", N_ITERACTION - n_itc);
                 printf("⏲  Time: %fs.\n\n", end - start);
 
-                printf("Here the master 🧑‍🎓! The resulting matrix is: \n");
-                printMat(r_mat);
-                printf("And this is the initial matrix, bye-bye 👋: \n");
-                printMat(i_mat);
+                if (OUTPUT_TYPE == 1) {
+                    printf("Here the master 🧑‍🎓! The resulting matrix is: \n");
+                    printMat(r_mat);
+                    printf("And this is the initial matrix, bye-bye 👋: \n");
+                    printMat(i_mat);
+                }
                 if (ROWS * COLUMNS >= 20000) printf("Why are you so evil? 😭\n");
             }
             free(i_mat);
+            free(r_mat);
         }
     } else if (rank == MASTER)
         printf("Here the master 🧑‍🎓! \x1b[31mcomputation impossible\x1b[0m, excessive number of slaves. \n");
