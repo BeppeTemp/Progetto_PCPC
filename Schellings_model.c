@@ -26,7 +26,7 @@
 //#endregion
 
 //*#region Definition of structures
-typedef struct Data {
+typedef struct {
     //Assigned start and finish submatrix
     int r_start;
     int r_finish;
@@ -46,7 +46,7 @@ typedef struct Data {
     int *sec_gt_size;
     int *sec_gt_disp;
 } Data;
-typedef struct Move {
+typedef struct {
     //Arrival index of the moving agent
     int id_agent;
 
