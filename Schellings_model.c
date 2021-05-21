@@ -6,11 +6,11 @@
 #include "mpi.h"
 
 //* Outuput type
-#define OUTPUT_TYPE 2  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define ROWS 20000           //? Number of rows
-#define COLUMNS 7000        //? Number of columns
+#define ROWS 40           //? Number of rows
+#define COLUMNS 60        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
