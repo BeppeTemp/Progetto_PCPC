@@ -266,89 +266,89 @@ int isMyKind(int my_index, int x_index, Data data) {
     //Check if two agents are of the same type
     return data.sub_mat[my_index] == data.sub_mat[x_index];
 }
-void satCorner(int id, Data data, int *neigh, int *my_kynd, int pos) {
+void satCorner(int id, Data data, int *neigh, int *my_kind, int pos) {
     //Check the satisfaction of an agent in the corner
     *neigh += 3;
     switch (pos) {
         //Top left corner
         case 0:
-            *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS), data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, id + 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS), data);
+            *my_kind += isMyKind(id, (id + COLUMNS) + 1, data);
             break;
         //Top right corner
         case 1:
-            *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS), data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, id - 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS), data);
+            *my_kind += isMyKind(id, (id + COLUMNS) - 1, data);
             break;
         //Bottom left corner
         case 2:
-            *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS), data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, id + 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS), data);
+            *my_kind += isMyKind(id, (id - COLUMNS) + 1, data);
             break;
         //Bottom right corner
         case 3:
-            *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS), data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, id - 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS), data);
+            *my_kind += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
     }
 }
-void satEdge(int id, Data data, int *neigh, int *my_kynd, int pos) {
+void satEdge(int id, Data data, int *neigh, int *my_kind, int pos) {
     //Check the satisfaction of an agent in the edge
     *neigh += 5;
     switch (pos) {
         //Top edge
         case 0:
-            *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS), data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, id + 1, data);
+            *my_kind += isMyKind(id, id - 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS), data);
+            *my_kind += isMyKind(id, (id + COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS) - 1, data);
             break;
         //Left edge
         case 1:
-            *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS), data);
-            *my_kynd += isMyKind(id, (id - COLUMNS), data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, id + 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS), data);
+            *my_kind += isMyKind(id, (id - COLUMNS), data);
+            *my_kind += isMyKind(id, (id + COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS) + 1, data);
             break;
         //Right edge
         case 2:
-            *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id + COLUMNS), data);
-            *my_kynd += isMyKind(id, (id - COLUMNS), data);
-            *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, id - 1, data);
+            *my_kind += isMyKind(id, (id + COLUMNS), data);
+            *my_kind += isMyKind(id, (id - COLUMNS), data);
+            *my_kind += isMyKind(id, (id + COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
         //Bottom edge
         case 3:
-            *my_kynd += isMyKind(id, id + 1, data);
-            *my_kynd += isMyKind(id, id - 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS), data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
-            *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
+            *my_kind += isMyKind(id, id + 1, data);
+            *my_kind += isMyKind(id, id - 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS), data);
+            *my_kind += isMyKind(id, (id - COLUMNS) + 1, data);
+            *my_kind += isMyKind(id, (id - COLUMNS) - 1, data);
             break;
     }
 }
-void satCenter(int id, Data data, int *neigh, int *my_kynd) {
+void satCenter(int id, Data data, int *neigh, int *my_kind) {
     //Check the satisfaction of a central agent
     *neigh += 8;
-    *my_kynd += isMyKind(id, id + 1, data);
-    *my_kynd += isMyKind(id, id - 1, data);
-    *my_kynd += isMyKind(id, (id - COLUMNS), data);
-    *my_kynd += isMyKind(id, (id + COLUMNS), data);
-    *my_kynd += isMyKind(id, (id - COLUMNS) + 1, data);
-    *my_kynd += isMyKind(id, (id - COLUMNS) - 1, data);
-    *my_kynd += isMyKind(id, (id + COLUMNS) + 1, data);
-    *my_kynd += isMyKind(id, (id + COLUMNS) - 1, data);
+    *my_kind += isMyKind(id, id + 1, data);
+    *my_kind += isMyKind(id, id - 1, data);
+    *my_kind += isMyKind(id, (id - COLUMNS), data);
+    *my_kind += isMyKind(id, (id + COLUMNS), data);
+    *my_kind += isMyKind(id, (id - COLUMNS) + 1, data);
+    *my_kind += isMyKind(id, (id - COLUMNS) - 1, data);
+    *my_kind += isMyKind(id, (id + COLUMNS) + 1, data);
+    *my_kind += isMyKind(id, (id + COLUMNS) - 1, data);
 }
 int calcSat(int id, Data data, int rank) {
     //Calculate the satisfaction of an agent
-    int neigh = 0, my_kynd = 0;
+    int neigh = 0, my_kind = 0;
     int rowS = data.sec_size[rank] / COLUMNS;
     int rowS_index, col_index;
 
@@ -356,29 +356,29 @@ int calcSat(int id, Data data, int rank) {
 
     if (rowS_index == 0)
         if (col_index == 0)
-            satCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
+            satCorner(id, data, &neigh, &my_kind, 0);  //Upper left corner
         else if (col_index == COLUMNS - 1)
-            satCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
+            satCorner(id, data, &neigh, &my_kind, 1);  //Upper right corner
         else
-            satEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
+            satEdge(id, data, &neigh, &my_kind, 0);  //Upper edge
 
     else if (rowS_index == rowS - 1)
         if (col_index == 0)
-            satCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
+            satCorner(id, data, &neigh, &my_kind, 2);  //Lower left corner
         else if (col_index == COLUMNS - 1)
-            satCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
+            satCorner(id, data, &neigh, &my_kind, 3);  //Lower right corner
         else
-            satEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
+            satEdge(id, data, &neigh, &my_kind, 3);  //Lower edge
 
     else if (col_index == 0 && rowS_index > 0 && rowS_index < rowS - 1)
-        satEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
+        satEdge(id, data, &neigh, &my_kind, 1);  //Left edge
 
     else if (col_index == COLUMNS - 1 && rowS_index > 0 && rowS_index < rowS)
-        satEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
+        satEdge(id, data, &neigh, &my_kind, 2);  //Right edge
     else
-        satCenter(id, data, &neigh, &my_kynd);  //Center
+        satCenter(id, data, &neigh, &my_kind);  //Center
 
-    float perc = (100 / (float)neigh) * my_kynd;
+    float perc = (100 / (float)neigh) * my_kind;
     return perc >= SAT_THRESHOLD;
 }
 //#endregion
