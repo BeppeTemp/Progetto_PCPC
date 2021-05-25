@@ -135,7 +135,7 @@ Gli slot liberi all'interno della matrice vengono calcolati in modo distribuito 
 Successivamente gli slot indetificati vengono assegnati ai singoli processi, questo avviene, con lo scopo di limitare al minimo le comunicazioni, tramite una funzione di ***shuffle*** che "disordina" il vettore in modo da randomizzare il modo in cui gli slot vengono assegnati, successicamente i processi prendono i primi **n_empty/world_size elementi** si è deciso di utilizzare questo metodo di assegnazioni degli slot liberi per due motivi:
 
 * **Riduzione delle comunicazioni e distribuzione del carico:** Essendo ogni processo in grado di calcolare i propri slot liberi che utilizzerà per muovere i propri agenti insoddisfatti, non è necessario un processo che si accolli tale onere, in questo modo i processi restano sincronizzati per tutta l'esecuzione del codice, oltre che ridurre tutte quelle comunicazioni che sarebbero state necessarie per comunicare le posizioni.
-* **Estetica della soluzione:** L'algoritmo di assegnazione scelto "spreca" consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).
+* **Estetica della soluzione:** L'algoritmo di assegnazione scelto "spreca" consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).****
 
 ```c
 int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc) {
@@ -183,13 +183,92 @@ int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc)
 
 ### **Spostamento degli agenti insoddisfatti**
 
+Una volta assegnate le posizioni vuote ai singoli processi, ognuno di essi identifica i primi **n_my_empty** agenti insoddisfatti che saranno candidati allo spostamento, per ognuno di questi agenti vengono salvate tre informazioni:
+
+* **Id_agent:** Che rappresenta la cella di "arrivo" del agente in movimento (una delle celle vuote assegnate al processo).
+* **id_reset:** Che rappresenta la cella di "partenza" del agente in spostamento e che quindi dovra essere azzerata.
+*  **vl_agent:** Che rappresenta la tipologia dell'agente che si sta spostando.
+
+Tutte queste informazioni vengono aggregate all'interno della struttura data **Move** di cui array rappresenta tutte i movimenti che un determinato processo vuole eseguire.
+
+```c
+typedef struct {
+    //Arrival index of the moving agent
+    int id_agent;
+
+    //Starting index of the moving agent
+    int id_reset;
+
+    //Type of agent on the move
+    char vl_agent;
+} Move;
+```
+
+Una volta che ogni processo a popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di allgather, cosi facendo tutti i processi saranno a conoscenza di tutti gli spostamenti che stanno avvenendo nell'iterazione in corso e scorrendo il vettore saranno in grado di sincronizzare le proprio sotto matrici (resettando celle o popolandole).
+
+```c
+void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
+    //Carries out the movement operations of the agents
+    int sec_size[wd_size];
+    int sec_disp[wd_size];
+
+    for (int i = 0; i < wd_size; i++) {
+        sec_size[i] = data.n_my_empty;
+        sec_disp[i] = i == 0 ? 0 : sec_disp[i - 1] + sec_size[i - 1];
+    }
+
+    Move *moves = malloc(sizeof(Move) * data.n_my_empty * wd_size);
+    MPI_Allgatherv(my_moves, data.n_my_empty, move_data_type, moves, sec_size, sec_disp, move_data_type, MPI_COMM_WORLD);
+
+    for (int i = 0; i < data.n_my_empty * wd_size; i++) {
+        if (moves[i].id_agent != -1) {
+            if (calcMembership(data, rank, moves[i].id_agent)) {
+                data.sub_mat[moves[i].id_agent - data.sec_disp[rank]] = moves[i].vl_agent;
+            }
+            if (calcMembership(data, rank, moves[i].id_reset)) {
+                data.sub_mat[moves[i].id_reset - data.sec_disp[rank]] = ' ';
+            }
+        }
+    }
+    free(moves);
+}
+```
+
 ### **Aggregazione dei risultati e presentazione**
+
+Al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather, nel processo 0 che rappresenta il master della computazione, questo processo si occuperà infine delle procedure di stampa del risulatato.
 
 ## **Note sull'implementazione**
 
+L'implementazione mette a disposizione tre tipologie di output, selezionabili tramite il flag **OUTPUT_TYPE** presente nella parte iniziale del codice:
+
+```c
+#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+```
+
+* **HTML:** Formatta l'output in una pagina html che oltre alla matrice risultante e iniziale, mostra le impsotazioni dell'esecuzione nonchè alcune statistiche sul tempo di computazione impiegato e il numero di iterazione effettuate.
+* **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte.
+* **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi.
+
 ### **Compilazione**
 
+
 ### **Esecuzione**
+
+```c
+//* Outuput type
+#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+
+//*#region Computation settings
+#define ROWS 40           //? Number of rows
+#define COLUMNS 60        //? Number of columns
+#define O_PERCENTAGE 33   //? Percentage of O agents
+#define X_PERCENTAGE 33   //? Percentage of X agents
+#define SAT_THRESHOLD 35  //? Percentage of satisfaction required
+#define N_ITERACTION 100  //? Number of iteration calculated
+#define ASSIGN_SEED 10    //? Seed for free location assignment
+//#endregion
+```
 
 ## **Risultati**
 
