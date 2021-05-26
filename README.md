@@ -204,7 +204,7 @@ typedef struct {
 } Move;
 ```
 
-Una volta che ogni processo a popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di allgather, cosi facendo tutti i processi saranno a conoscenza di tutti gli spostamenti che stanno avvenendo nell'iterazione in corso e scorrendo il vettore saranno in grado di sincronizzare le proprio sotto matrici (resettando celle o popolandole).
+Una volta che ogni processo ha popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di allgather, cosi facendo tutti i processi saranno a conoscenza di tutti gli spostamenti che stanno avvenendo nell'iterazione in corso e scorrendo il vettore saranno in grado di sincronizzare le proprio sotto matrici (resettando celle o popolandole).
 
 ```c
 void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
@@ -236,7 +236,7 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 
 ### **Aggregazione dei risultati e presentazione**
 
-Al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather, nel processo 0 che rappresenta il master della computazione, questo processo si occuperà infine delle procedure di stampa del risulatato.
+Al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather nel processo 0, che rappresenta il master della computazione, questo processo si occuperà infine delle procedure di stampa del risulatato.
 
 ## **Note sull'implementazione**
 
@@ -252,8 +252,15 @@ L'implementazione mette a disposizione tre tipologie di output, selezionabili tr
 
 ### **Compilazione**
 
+Un esempio di comando di compilazione è il seguente:
+
+```bash
+mpicc Schellings_model.c
+```
 
 ### **Esecuzione**
+
+Prima di avviare il l'esecuzione è possibile modificare le impostazioni di quest'ultima all'interno del codice sorgente:
 
 ```c
 //* Outuput type
@@ -268,6 +275,12 @@ L'implementazione mette a disposizione tre tipologie di output, selezionabili tr
 #define N_ITERACTION 100  //? Number of iteration calculated
 #define ASSIGN_SEED 10    //? Seed for free location assignment
 //#endregion
+```
+
+Esempio di comando di esecuzione:
+
+```bash
+mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Schellings_model.out
 ```
 
 ## **Risultati**
@@ -294,5 +307,7 @@ P={some value}
 #### Scalabilità forte N={some value} 
 
 ## **Descrizione dei risultati**
+
+## **Correttezza**
 
 ## **Conclusioni**

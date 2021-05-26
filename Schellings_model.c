@@ -6,11 +6,12 @@
 #include "mpi.h"
 
 //* Outuput type
-#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+#define OUTPUT_TYPE 1  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define ROWS 40           //? Number of rows
-#define COLUMNS 60        //? Number of columns
+#define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
+#define ROWS 5            //? Number of rows
+#define COLUMNS 5         //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
@@ -58,30 +59,6 @@ typedef struct {
 } Move;
 //#endregion
 
-//!#region Debug functions
-void sampleMat(char *i_mat) {
-    //Fills the matrix with a constant set of values
-    i_mat[0] = 'O';
-    i_mat[1] = 'O';
-    i_mat[2] = 'X';
-    i_mat[3] = ' ';
-}
-void syncProcess(unsigned int rank) {
-    //Inserts delays in computation to synchronize the processes
-    usleep(rank * 500);
-}
-void printVetInt(int vet[], int len) {
-    //Print integer array
-    if (len > 0) {
-        for (int i = 0; i < len; i++) {
-            printf("| %d ", vet[i]);
-        }
-        printf("|\n");
-    } else
-        printf("\n");
-}
-//!#endregion
-
 //*#region Matrix generation functions
 char randomValue() {
     //Converts a random integer value to an agent type
@@ -95,7 +72,10 @@ char randomValue() {
 }
 void generateMat(char *i_mat) {
     //Randomly fills the matrix
-    srand(time(NULL) + MASTER);
+    if (RANDOM_MATRIX)
+        srand(time(NULL) + MASTER);
+    else
+        srand(MASTER);
     for (int i = 0; i < (ROWS * COLUMNS); i++)
         i_mat[i] = randomValue();
 }
