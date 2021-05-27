@@ -12,11 +12,20 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
 
 La seguente implementazione si basa su **quattro passi di computazione** ben definiti
 
-- [Divisione della matrice tra i processi coinvolti](#divisione-della-matrice-tra-i-processi-coinvolti)
-- [Calcolo della soddisfazione degli agenti](#calcolo-della-soddisfazione-degli-agenti)
-- [Assegnazione degli slot liberi](#assegnazione-degli-slot-liberi)
-- [Spostamento degli agenti insoddisfatti](#spostamento-degli-agenti-insoddisfatti)
-- [Aggregazione dei risultati e presentazione](#aggregazione-dei-risultati-e-presentazione)
+- [**Schelling's model of segregation**](#schellings-model-of-segregation)
+  - [**Descrizione dell'implementazione**](#descrizione-dellimplementazione)
+    - [**Divisione della matrice tra i processi coinvolti**](#divisione-della-matrice-tra-i-processi-coinvolti)
+    - [**Calcolo della soddisfazione degli agenti**](#calcolo-della-soddisfazione-degli-agenti)
+    - [**Assegnazione degli slot liberi**](#assegnazione-degli-slot-liberi)
+    - [**Spostamento degli agenti insoddisfatti**](#spostamento-degli-agenti-insoddisfatti)
+    - [**Aggregazione dei risultati e presentazione**](#aggregazione-dei-risultati-e-presentazione)
+  - [**Note sull'implementazione**](#note-sullimplementazione)
+    - [**Compilazione**](#compilazione)
+    - [**Esecuzione**](#esecuzione)
+  - [**Risultati**](#risultati)
+  - [**Descrizione dei risultati**](#descrizione-dei-risultati)
+  - [**Correttezza**](#correttezza)
+  - [**Conclusioni**](#conclusioni)
 
 ### **Divisione della matrice tra i processi coinvolti**
 
@@ -284,27 +293,6 @@ mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Sche
 ```
 
 ## **Risultati**
-
-I={some value}
-P={some value}
-
-### K = {some value}
-
-#### Scalabilità debole N={some value}
-
-#### Scalabilità forte N={some value}
-
-### K/2 = {some value}
-
-#### Scalabilità debole N={some value}
-
-#### Scalabilità forte N={some value} 
-
-### 2K = {some value}
-
-#### Scalabilità debole N={some value}
-
-#### Scalabilità forte N={some value} 
 
 ## **Descrizione dei risultati**
 

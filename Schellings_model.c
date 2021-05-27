@@ -6,12 +6,12 @@
 #include "mpi.h"
 
 //* Outuput type
-#define OUTPUT_TYPE 1  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+#define OUTPUT_TYPE 2  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
 #define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
-#define ROWS 5            //? Number of rows
-#define COLUMNS 5         //? Number of columns
+#define ROWS 1000            //? Number of rows
+#define COLUMNS 10         //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
@@ -596,7 +596,6 @@ void main() {
         free(data.sec_disp);
         free(data.sec_gt_size);
         free(data.sec_gt_disp);
-        free(data.sub_mat);
         free(data.my_emp_loc);
 
         if (rank == MASTER) {
