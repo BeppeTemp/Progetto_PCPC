@@ -6,13 +6,13 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
 - Matricola: **0522501062**
 - Data di consegna: **01/06/2021**
 
-<img src="docs/Images/sample.png"/>
-
-## **Descrizione dell'implementazione**
-
-La seguente implementazione si basa su **quattro passi di computazione** ben definiti
+## **Sommario** ##
 
 - [**Schelling's model of segregation**](#schellings-model-of-segregation)
+  - [**Sommario**](#sommario)
+  - [**Descrizione del problema:**](#descrizione-del-problema)
+    - [**Segregazione spaziale:**](#segregazione-spaziale)
+    - [**Modello di Schelling:**](#modello-di-schelling)
   - [**Descrizione dell'implementazione**](#descrizione-dellimplementazione)
     - [**Divisione della matrice tra i processi coinvolti**](#divisione-della-matrice-tra-i-processi-coinvolti)
     - [**Calcolo della soddisfazione degli agenti**](#calcolo-della-soddisfazione-degli-agenti)
@@ -26,6 +26,22 @@ La seguente implementazione si basa su **quattro passi di computazione** ben def
   - [**Descrizione dei risultati**](#descrizione-dei-risultati)
   - [**Correttezza**](#correttezza)
   - [**Conclusioni**](#conclusioni)
+## **Descrizione del problema:**
+
+### **Segregazione spaziale:** ###
+
+La segregazione residenziale (o spaziale) è un fenomeno sociale che consiste nell'occupazione separata, da parte di diversi gruppi umani, di aree spaziali collocate all'interno di determinati orizzonti geopolitici, come un'area urbana, una località, una regione, uno stato.
+
+### **Modello di Schelling:** ###
+
+A cavallo tra gli anni 60 e 70 del Novecento, l'economista Thomas Schelling, condusse degli studi con cui si proponeva di indagare l'influenza delle preferenze individuali nel determinare la segregazione spaziale; Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall'"infelicità" della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
+
+<img src="docs/Images/sample.png"/>
+
+## **Descrizione dell'implementazione**
+
+La seguente implementazione si basa su **quattro passi di computazione** ben definiti
+
 
 ### **Divisione della matrice tra i processi coinvolti**
 
@@ -273,11 +289,12 @@ Prima di avviare il l'esecuzione è possibile modificare le impostazioni di ques
 
 ```c
 //* Outuput type
-#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+#define OUTPUT_TYPE 2  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define ROWS 40           //? Number of rows
-#define COLUMNS 60        //? Number of columns
+#define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
+#define ROWS 1000            //? Number of rows
+#define COLUMNS 10         //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
