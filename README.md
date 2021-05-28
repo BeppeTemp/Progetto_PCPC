@@ -8,8 +8,6 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
 
 ## **Sommario** ##
 
-- [**Schelling's model of segregation**](#schellings-model-of-segregation)
-  - [**Sommario**](#sommario)
   - [**Descrizione del problema:**](#descrizione-del-problema)
     - [**Segregazione spaziale:**](#segregazione-spaziale)
     - [**Modello di Schelling:**](#modello-di-schelling)
@@ -28,24 +26,26 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
   - [**Conclusioni**](#conclusioni)
 ## **Descrizione del problema:**
 
+La seguente implementazione si pone l'obbiettivo di realizzare una simulazione del modello di **segregazione di Schelling**, tramite l'uso del linguaggio **C** e della libreria **MPI (Message Passing Interface).**
 ### **Segregazione spaziale:** ###
 
-La segregazione residenziale (o spaziale) è un fenomeno sociale che consiste nell'occupazione separata, da parte di diversi gruppi umani, di aree spaziali collocate all'interno di determinati orizzonti geopolitici, come un'area urbana, una località, una regione, uno stato.
+La **segregazione residenziale** (o **spaziale**) è un fenomeno sociale che consiste nell'occupazione separata, da parte di diversi gruppi umani, di aree spaziali collocate all'interno di determinati orizzonti geopolitici, come un'area urbana, una località, una regione, uno stato.
 
 ### **Modello di Schelling:** ###
 
-A cavallo tra gli anni 60 e 70 del Novecento, l'economista Thomas Schelling, condusse degli studi con cui si proponeva di indagare l'influenza delle preferenze individuali nel determinare la segregazione spaziale; Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall'"infelicità" della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
+A cavallo tra gli anni **60** e **70** del **Novecento**, l'economista **Thomas Schelling**, condusse una serie di studi con cui si proponeva di indagare l'influenza delle preferenze individuali nel determinare la segregazione spaziale; 
+
+Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall' **"infelicità"** della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
 
 <img src="docs/Images/sample.png"/>
 
 ## **Descrizione dell'implementazione**
 
-La seguente implementazione si basa su **quattro passi di computazione** ben definiti
-
+La seguente implementazione si basa su **cinque passi di computazione** ben definiti, che permettono di dividere la matrice in parti ragionevolmente uguali tra i processi, indentificare gli agenti **insoddisfatti** spostandoli in determinate posizioni libere sparse sulla matrice.
 
 ### **Divisione della matrice tra i processi coinvolti**
 
-Per dividere il carico di lavoro tra i vari processi è stato inizialmente valutata la possibilità di dividere la matrice in modo perfettaente equo tra questi ultimi, andando cioè a valutare divisioni composte da sotto sezioni di righe. Successivamente si è però notato che tale soluzione creava un notevo dispendio di tempo di computazione, che rendeva vano ogni miglioramento dovuto all distribuzione più equa deglia genti, si è per questo motivo optato per una soluzione più classica dividendo la matrice per righe, in questo modo nel caso pessimo uno o più agenti gestiscono **COLLUMS** agenti in più rispetto agli altri.
+Per dividere il carico di lavoro tra i vari processi è stato inizialmente valutata la possibilità di dividere la matrice in modo perfettamente equo tra questi ultimi, andando cioè a valutare divisioni composte da sotto sezioni di righe. Successivamente si è però notato che tale soluzione creava un notevole spreco dal punto di vista del tempo di computazione, che rendeva vano ogni miglioramento dovuto all distribuzione più equa degli agenti, si è per questo motivo optato per una soluzione più classica dividendo la matrice per righe, in questo modo nel caso pessimo uno o più agenti gestiscono **COLLUMS** agenti in più rispetto agli altri.
 
 La divisione effettiva viene infine realizzata tramite l'utilizzo di una **ScatterV**:
 
@@ -53,7 +53,7 @@ La divisione effettiva viene infine realizzata tramite l'utilizzo di una **Scatt
 MPI_Scatterv(i_mat, data.sec_size, data.sec_disp, MPI_CHAR, data.sub_mat, data.sec_size[rank], MPI_CHAR, MASTER, MPI_COMM_WORLD);
 ```
 
-ed il codice che si occupa del calcolo delle grandezze necessarie alla divisione è il seguente:
+Tramite una serie dei valori di **Section_Size** e **Displacement** che vengono calcolati nella funzione **calcSizes:**
 
 ```c
 void calcSizes(int wd_size, Data data) {
@@ -82,7 +82,9 @@ void calcSizes(int wd_size, Data data) {
 }
 ```
 
-é importante notare come la seguente funzione si occupa anche del calcolo delle grandezze necessarie alle successive operationi di gather con lo scopo riunire tutte le sotto matrici e presentare il risultato finale. Tutti questi valori vengono inoltre conservati in una struttura dati **Data** che contiene tutti i dati necessari alla computazione per ogni processo, in particolare per quanto riguarda i dati relativi ai displacement e le section size, tutti i processi dispongono di tutti i dati, questo per evitare inutili e costose operazioni di **comunicazione**:
+é importante notare come la seguente funzione si occupa anche del calcolo delle grandezze necessarie alle successive operazioni di **Gather** con lo scopo riunire tutte le sotto matrici e presentare il risultato finale.
+
+Tutti questi valori vengono inoltre conservati in una struttura dati **Data** che contiene tutti i dati necessari alla computazione per ogni processo, in particolare per quanto riguarda i dati relativi ai displacement e le section size, tutti i processi dispongono di tutti i dati, questo per evitare inutili e costose operazioni di **comunicazione:**
 
 ```c
 typedef struct {
@@ -109,58 +111,38 @@ typedef struct {
 
 ### **Calcolo della soddisfazione degli agenti**
 
-Il calcolo della soddisfazione è stato effettuato tramite la funzione **calcSat** che data la posizione di un agente identifica il tipo di posizione in cui si trova (Angolo, Bordo o Centro) e procede al calcolo della soddisfazione tramite la seguente formula:
+Il calcolo della soddisfazione è stato effettuato tramite la funzione **calcSat** che data la posizione di un agente identifica il tipo di posizione di questo ultimo (**Angolo**, **Bordo** o **Centro**) e procede al calcolo della soddisfazione tramite la seguente formula:
 
-$$\frac{neigh}{100}*mykind$$
+<p style="text-align: center;"><b> (neigh/100)*mykind </b></p>
 
-Dove ***neigh*** indica la grandezza del vicinato del agente preso in esame (3 per gli angoli e 5 per i bordi, 8 per gli agenti centrali) e ***mykind*** il numero di agenti del vicinato appartenenti alla stessa specie.
 
-```c
-int calcSat(int id, Data data, int rank) {
-    //Calculate the satisfaction of an agent
-    int neigh = 0, my_kynd = 0;
-    int rowS = data.sec_size[rank] / COLUMNS;
-    int rowS_index, col_index;
-
-    convertIndex(id, &rowS_index, &col_index);
-
-    if (rowS_index == 0)
-        if (col_index == 0)
-            satCorner(id, data, &neigh, &my_kynd, 0);  //Upper left corner
-        else if (col_index == COLUMNS - 1)
-            satCorner(id, data, &neigh, &my_kynd, 1);  //Upper right corner
-        else
-            satEdge(id, data, &neigh, &my_kynd, 0);  //Upper edge
-
-    else if (rowS_index == rowS - 1)
-        if (col_index == 0)
-            satCorner(id, data, &neigh, &my_kynd, 2);  //Lower left corner
-        else if (col_index == COLUMNS - 1)
-            satCorner(id, data, &neigh, &my_kynd, 3);  //Lower right corner
-        else
-            satEdge(id, data, &neigh, &my_kynd, 3);  //Lower edge
-
-    else if (col_index == 0 && rowS_index > 0 && rowS_index < rowS - 1)
-        satEdge(id, data, &neigh, &my_kynd, 1);  //Left edge
-
-    else if (col_index == COLUMNS - 1 && rowS_index > 0 && rowS_index < rowS)
-        satEdge(id, data, &neigh, &my_kynd, 2);  //Right edge
-    else
-        satCenter(id, data, &neigh, &my_kynd);  //Center
-
-    float perc = (100 / (float)neigh) * my_kynd;
-    return perc >= SAT_THRESHOLD;
-}
-```
+Dove ***neigh*** indica il numero di celle che circondano l'agente (**3 per gli angoli**, **5 per i bordi** e **8 per gli agenti centrali**) e ***mykind*** il numero di agenti nel vicinato appartenenti alla stessa specie.
 
 ### **Assegnazione degli slot liberi**
 
-Gli slot liberi all'interno della matrice vengono calcolati in modo distribuito tramite l'utilizzo di una **All_Gather**, in sostanza ogni processo procede a identificare gli slot liberi presenti nella propria sottomatrice, spazi che vengono poi aggregati e ridistribuiti.
+Gli slot liberi all'interno della matrice vengono identificati all'inizio di ogni iterazione in modo distribuito tramite l'utilizzo di una **All_Gather**, in sostanza ogni processo procede a identificare gli slot liberi presenti nella propria sottomatrice, che vengono poi aggregati e ridistribuiti.
 
-Successivamente gli slot indetificati vengono assegnati ai singoli processi, questo avviene, con lo scopo di limitare al minimo le comunicazioni, tramite una funzione di ***shuffle*** che "disordina" il vettore in modo da randomizzare il modo in cui gli slot vengono assegnati, successicamente i processi prendono i primi **n_empty/world_size elementi** si è deciso di utilizzare questo metodo di assegnazioni degli slot liberi per due motivi:
+Successivamente gli slot indetificati vengono assegnati ai singoli processi. Questo avviene, con lo scopo di limitare al minimo le comunicazioni, tramite una funzione di ***shuffle*** che "disordina" il vettore in modo da randomizzare il modo in cui gli slot vengono assegnati, successicamente i processi prendono i primi **n_empty/world_size** elementi. 
 
-* **Riduzione delle comunicazioni e distribuzione del carico:** Essendo ogni processo in grado di calcolare i propri slot liberi che utilizzerà per muovere i propri agenti insoddisfatti, non è necessario un processo che si accolli tale onere, in questo modo i processi restano sincronizzati per tutta l'esecuzione del codice, oltre che ridurre tutte quelle comunicazioni che sarebbero state necessarie per comunicare le posizioni.
-* **Estetica della soluzione:** L'algoritmo di assegnazione scelto "spreca" consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).****
+```c
+void shuffle(int *vet, int length) {
+    //Randomizes the position of values in a vector
+    for (int i = length - 1; i > 0; i--) {
+        // Pick a random index from 0 to i
+        int j = rand() % (i + 1);
+
+        // Swap arr[i] with the element at random index
+        swap(&vet[i], &vet[j]);
+    }
+}
+```
+
+Si è deciso di utilizzare questo metodo di assegnazioni degli slot liberi per due motivi:
+
+* **Riduzione delle comunicazioni e distribuzione del carico:** Essendo ogni processo in grado di calcolare i propri slot liberi, che utilizzerà per muovere i propri agenti insoddisfatti, in modo indipendente non è necessario un processo che si accolli tale onere, in questo modo i processi restano sincronizzati per tutta l'esecuzione del codice, oltre ad andare a ridurre tutte quelle comunicazioni che sarebbero state necessarie per comunicare le assegnazioni.
+* **Estetica della soluzione:** L'algoritmo di assegnazione scelto **"spreca"** consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).
+
+La funziona che si occupa di tutto questo è **calcEmptySlots:**
 
 ```c
 int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc) {
@@ -208,13 +190,13 @@ int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc)
 
 ### **Spostamento degli agenti insoddisfatti**
 
-Una volta assegnate le posizioni vuote ai singoli processi, ognuno di essi identifica i primi **n_my_empty** agenti insoddisfatti che saranno candidati allo spostamento, per ognuno di questi agenti vengono salvate tre informazioni:
+Una volta assegnate le posizioni vuote ai singoli processi, ognuno di essi identifica i primi **n_my_empty** (numero di celle vuote a disposizione) agenti insoddisfatti che saranno candidati allo spostamento, per ognuno di questi agenti vengono salvate tre informazioni:
 
-* **Id_agent:** Che rappresenta la cella di "arrivo" del agente in movimento (una delle celle vuote assegnate al processo).
-* **id_reset:** Che rappresenta la cella di "partenza" del agente in spostamento e che quindi dovra essere azzerata.
-*  **vl_agent:** Che rappresenta la tipologia dell'agente che si sta spostando.
+- **Id_agent:** Che rappresenta la cella di "arrivo" del agente in movimento (una delle celle vuote assegnate al processo).
+- **id_reset:** Che rappresenta la cella di "partenza" del agente in spostamento e che quindi dovra essere azzerata.
+- **vl_agent:** Che rappresenta la tipologia dell'agente che si sta spostando.
 
-Tutte queste informazioni vengono aggregate all'interno della struttura data **Move** di cui array rappresenta tutte i movimenti che un determinato processo vuole eseguire.
+Tutte queste informazioni vengono successivamente aggregate all'interno della struttura data **Move** di cui array rappresenta tutte i movimenti che un determinato processo vuole eseguire.
 
 ```c
 typedef struct {
@@ -229,7 +211,9 @@ typedef struct {
 } Move;
 ```
 
-Una volta che ogni processo ha popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di allgather, cosi facendo tutti i processi saranno a conoscenza di tutti gli spostamenti che stanno avvenendo nell'iterazione in corso e scorrendo il vettore saranno in grado di sincronizzare le proprio sotto matrici (resettando celle o popolandole).
+Una volta che ogni processo ha popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di **Allgather**, cosi facendo tutti i processi possiederanno un array **Move** che contiene tutti gli spostamenti dell'iterazione corrente che permetterà di sincronizzare le proprio sotto matrici (**resettando celle** o **popolandole**).
+
+La funzione che si occupa di questo è **Move:**
 
 ```c
 void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, int rank) {
@@ -261,7 +245,32 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 
 ### **Aggregazione dei risultati e presentazione**
 
-Al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather nel processo 0, che rappresenta il master della computazione, questo processo si occuperà infine delle procedure di stampa del risulatato.
+Il massimo numero di iterazioni che vengono computate viene definito dalla costante **N_ITERACTION**, inoltre l'implementazione ad ogni computazione effettuando una **All_Reduce** del numero di agenti insoddisfatti identificati è in grado di fermare, se occorre, la computazione.
+
+```c
+//Check if all processes have finished their movements
+int tot_over;
+MPI_Allreduce(&is_over, &tot_over, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+return (tot_over == 0);
+```
+
+Infine al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather nel processo 0, che rappresenta il master della computazione, questo processo si occuperà infine della stampa del risulatato.
+
+```c
+void gatherResult(Data data, int rank, char *i_mat) {
+    //Gather results and save them to a file
+    char *section = malloc(sizeof(char) * data.sec_gt_size[rank]);
+    int k = 0;
+    for (int i = data.r_start; i <= data.r_finish; i++) {
+        section[k] = data.sub_mat[i];
+        k++;
+    }
+    MPI_Gatherv(section, data.sec_gt_size[rank], MPI_CHAR, i_mat, data.sec_gt_size, data.sec_gt_disp, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+
+    free(section);
+}
+```
 
 ## **Note sull'implementazione**
 
@@ -271,16 +280,16 @@ L'implementazione mette a disposizione tre tipologie di output, selezionabili tr
 #define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 ```
 
-* **HTML:** Formatta l'output in una pagina html che oltre alla matrice risultante e iniziale, mostra le impsotazioni dell'esecuzione nonchè alcune statistiche sul tempo di computazione impiegato e il numero di iterazione effettuate.
-* **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte.
-* **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi.
+- **HTML:** Formatta l'output in una pagina html che oltre alla matrice risultante e iniziale, mostra le impostazioni dell'esecuzione nonchè alcune statistiche sul tempo di computazione impiegato e il numero di iterazione effettuate.
+- **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte.
+- **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi.
 
 ### **Compilazione**
 
 Un esempio di comando di compilazione è il seguente:
 
 ```bash
-mpicc Schellings_model.c
+mpicc Schellings_model.c -o Schellings_model.out
 ```
 
 ### **Esecuzione**
