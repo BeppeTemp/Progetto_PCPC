@@ -294,7 +294,7 @@ mpicc Schellings_model.c -o Schellings_model.out
 
 ### **Esecuzione**
 
-Prima di avviare il l'esecuzione è possibile modificare le impostazioni di quest'ultima all'interno del codice sorgente:
+Prima di avviare l'esecuzione è possibile modificare le impostazioni di quest'ultima all'interno del codice sorgente:
 
 ```c
 //* Outuput type
