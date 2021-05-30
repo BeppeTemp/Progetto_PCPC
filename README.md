@@ -336,31 +336,31 @@ Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
 
 <table>
 <tr>
-<th>Matrice 1000 * 1000:</th>
+<td>Matrice 1000 * 1000:</td>
 </tr>
 <tr>
-<th><img src="docs/Images/Strong1000.png"/></th>
-<th><img src="docs/Images/SpeedUP1000.png"/></th>
+<td><img src="docs/Images/Strong1000.png"/></td>
+<td><img src="docs/Images/SpeedUP1000.png"/></td>
 </tr>
 <tr>
-<th>Matrice 2500 * 2500:</th>
+<td>Matrice 2500 * 2500:</td>
 </tr>
 <tr>
-<th><img src="docs/Images/Strong2500.png"/></th>
-<th><img src="docs/Images/SpeedUP2500.png"/></th>
+<td><img src="docs/Images/Strong2500.png"/></td>
+<td><img src="docs/Images/SpeedUP2500.png"/></td>
 </tr>
 <tr>
-<th>Matrice 5000 * 5000:</th>
+<td>Matrice 5000 * 5000:</td>
 </tr>
 <tr>
-<th><img src="docs/Images/Strong5000.png"/></th>
-<th><img src="docs/Images/SpeedUP5000.png"/></th>
+<td><img src="docs/Images/Strong5000.png"/></td>
+<td><img src="docs/Images/SpeedUP5000.png"/></td>
 </tr>
 <tr>
-<th>Weak Scalability:</th>
+<td>Weak Scalability:</td>
 </tr>
 <tr>
-<th><img src="docs/Images/Weak.png"/></th>
+<td><img src="docs/Images/Weak.png"/></td>
 </tr>
 </table>
 
