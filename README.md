@@ -302,8 +302,8 @@ Prima di avviare l'esecuzione è possibile modificare le impostazioni di quest'u
 
 //*#region Computation settings
 #define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
-#define ROWS 1000            //? Number of rows
-#define COLUMNS 10         //? Number of columns
+#define ROWS 1000         //? Number of rows
+#define COLUMNS 10        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
@@ -318,9 +318,38 @@ Esempio di comando di esecuzione:
 mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Schellings_model.out
 ```
 
-## **Risultati**
+## **Benchmarking**
 
-## **Descrizione dei risultati**
+Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **16 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono stati i seguenti:
+
+- **Matrice 1000*1000:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
+  
+- **Matrice 2500*2500:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
+  
+- **Matrice 5000*5000:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
+  
+- **Matrice da 1000 colonne e 1000 righe a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
+
+### **Risultati ottenuti**
+
+Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
+
+#### **Matrice 1000 * 1000:**
+<img src="docs/Images/Strong1000.png"/>
+<img src="docs/Images/SpeedUP1000.png"/>
+
+#### **Matrice 2500 * 2500:**
+<img src="docs/Images/Strong2500.png"/>
+<img src="docs/Images/SpeedUP2500.png"/>
+
+#### **Matrice 5000 * 5000:**
+<img src="docs/Images/Strong5000.png"/>
+<img src="docs/Images/SpeedUP5000.png"/>
+
+#### **Weak Scalability:**
+<img src="docs/Images/Weak.png"/>
+
+### **Descrizione dei risultati**
 
 ## **Correttezza**
 
