@@ -6,12 +6,12 @@
 #include "mpi.h"
 
 //* Outuput type
-#define OUTPUT_TYPE 2  //? 0 HTML output, 1 CLI output. 2 CLI reduced
+#define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
-#define ROWS 1000            //? Number of rows
-#define COLUMNS 10         //? Number of columns
+#define RANDOM_MATRIX 1   //? Choose between random (1) or static matrix(0)
+#define ROWS 100           //? Number of rows
+#define COLUMNS 100        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 35  //? Percentage of satisfaction required
@@ -75,7 +75,7 @@ void generateMat(char *i_mat) {
     if (RANDOM_MATRIX)
         srand(time(NULL) + MASTER);
     else
-        srand(MASTER);
+        srand(MASTER + ASSIGN_SEED);
     for (int i = 0; i < (ROWS * COLUMNS); i++)
         i_mat[i] = randomValue();
 }
@@ -604,6 +604,7 @@ void main() {
                 printResultHTML(i_mat, r_mat, N_ITERACTION - n_itc, end - start, wd_size);
             } else {
                 printf("🔬 Number of iterations: %d.\n", N_ITERACTION - n_itc);
+                printf("👨‍ Popolation is: %d\n", wd_size);
                 printf("⏲  Time: %fs.\n\n", end - start);
 
                 if (OUTPUT_TYPE == 1) {

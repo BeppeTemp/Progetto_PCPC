@@ -9,6 +9,7 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
 ___
 ## **Sommario** ##
 
+  - [**Sommario**](#sommario)
   - [**Descrizione del problema:**](#descrizione-del-problema)
     - [**Segregazione spaziale:**](#segregazione-spaziale)
     - [**Modello di Schelling:**](#modello-di-schelling)
@@ -21,8 +22,11 @@ ___
   - [**Note sull'implementazione**](#note-sullimplementazione)
     - [**Compilazione**](#compilazione)
     - [**Esecuzione**](#esecuzione)
-  - [**Risultati**](#risultati)
-  - [**Descrizione dei risultati**](#descrizione-dei-risultati)
+  - [**Benchmarking**](#benchmarking)
+    - [**Risultati ottenuti**](#risultati-ottenuti)
+      - [**Scalabilità forte:**](#scalabilità-forte)
+      - [**Scalabilità debole:**](#scalabilità-debole)
+    - [**Descrizione dei risultati:**](#descrizione-dei-risultati)
   - [**Correttezza**](#correttezza)
   - [**Conclusioni**](#conclusioni)
 
@@ -40,7 +44,7 @@ A cavallo tra gli anni **60** e **70** del **Novecento**, l'economista **Thomas 
 
 Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall' **"infelicità"** della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
 
-<img src="docs/Images/sample.png"/>
+<img src="docs/Images/Sample.png"/>
 
 ___
 ## **Descrizione dell'implementazione**
@@ -372,7 +376,7 @@ Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
 </tr>
 </table>
 
-#### **Descrizione dei risultati:**
+### **Descrizione dei risultati:**
 
 I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento significativo delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processi. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente.
 
@@ -382,5 +386,26 @@ la correttezza dell'algoritmo può essere valutata in principalemente grazie a d
 
 In primo luogo l'implementazione ricevuto in input una matrice costante e con numero di core costante restituisce sempre la stessa soluzione:
 
+<table>
+<tr>
+<td><img src="docs/Images/Sample1.png"/></td>
+<td><img src="docs/Images/Sample2.png"/></td>
+</tr>
+</table>
+
+In secondo luogo è possibile apprezzare come la matrice da disordinata e caotica si riorganizza andando a creare dei gruppi ben definiti di agenti,c he sono particolarmene evidenti per matrici molto grandi.
+
+<table>
+<td><b>Matrice finale:</b></td>
+<tr>
+<td><img src="docs/Images/Correttezza1.png"/></td>
+</tr>
+<td><b>Matrice iniziale:</b></td>
+<tr>
+<td><img src="docs/Images//Correttezza2.png"/></td>
+</tr>
+</table>
 
 ## **Conclusioni**
+
+Concludendo l'implementazione presentata realizza una buona simulazione del modello di Schelling sfruttando la programmazione parallela. La scelta di non utilizzare la semplificazione del problema ha però ovviamente portato a un aumento della complessità e delle comunicazioni necessaria, portando a un inevitabile decadimento delle prestazioni, che però è un **trade off** accettabile che porta a un risultato più valido e fedele al modello.
