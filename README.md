@@ -334,20 +334,35 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 
 Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
 
-#### **Matrice 1000 * 1000:**
-<img src="docs/Images/Strong1000.png"/>
-<img src="docs/Images/SpeedUP1000.png"/>
-
-#### **Matrice 2500 * 2500:**
-<img src="docs/Images/Strong2500.png"/>
-<img src="docs/Images/SpeedUP2500.png"/>
-
-#### **Matrice 5000 * 5000:**
-<img src="docs/Images/Strong5000.png"/>
-<img src="docs/Images/SpeedUP5000.png"/>
-
-#### **Weak Scalability:**
-<img src="docs/Images/Weak.png"/>
+<table>
+<tr>
+<th>Matrice 1000 * 1000:</th>
+</tr>
+<tr>
+<th><img src="docs/Images/Strong1000.png"/></th>
+<th><img src="docs/Images/SpeedUP1000.png"/></th>
+</tr>
+<tr>
+<th>Matrice 2500 * 2500:</th>
+</tr>
+<tr>
+<th><img src="docs/Images/Strong2500.png"/></th>
+<th><img src="docs/Images/SpeedUP2500.png"/></th>
+</tr>
+<tr>
+<th>Matrice 5000 * 5000:</th>
+</tr>
+<tr>
+<th><img src="docs/Images/Strong5000.png"/></th>
+<th><img src="docs/Images/SpeedUP5000.png"/></th>
+</tr>
+<tr>
+<th>Weak Scalability:</th>
+</tr>
+<tr>
+<th><img src="docs/Images/Weak.png"/></th>
+</tr>
+</table>
 
 ### **Descrizione dei risultati**
 
