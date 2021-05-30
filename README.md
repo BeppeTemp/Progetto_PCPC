@@ -6,6 +6,7 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
 - Matricola: **0522501062**
 - Data di consegna: **01/06/2021**
 
+___
 ## **Sommario** ##
 
   - [**Descrizione del problema:**](#descrizione-del-problema)
@@ -24,6 +25,8 @@ Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Clo
   - [**Descrizione dei risultati**](#descrizione-dei-risultati)
   - [**Correttezza**](#correttezza)
   - [**Conclusioni**](#conclusioni)
+
+___
 ## **Descrizione del problema:**
 
 La seguente implementazione si pone l'obbiettivo di realizzare una simulazione del modello di **segregazione di Schelling**, tramite l'uso del linguaggio **C** e della libreria **MPI (Message Passing Interface).**
@@ -39,6 +42,7 @@ Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da u
 
 <img src="docs/Images/sample.png"/>
 
+___
 ## **Descrizione dell'implementazione**
 
 La seguente implementazione si basa su **cinque passi di computazione** ben definiti, che permettono di dividere la matrice in parti ragionevolmente uguali tra i processi, indentificare gli agenti **insoddisfatti** spostandoli in determinate posizioni libere sparse sulla matrice.
@@ -271,7 +275,7 @@ void gatherResult(Data data, int rank, char *i_mat) {
     free(section);
 }
 ```
-
+___
 ## **Note sull'implementazione**
 
 L'implementazione mette a disposizione tre tipologie di output, selezionabili tramite il flag **OUTPUT_TYPE** presente nella parte iniziale del codice:
@@ -317,7 +321,7 @@ Esempio di comando di esecuzione:
 ```bash
 mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Schellings_model.out
 ```
-
+___
 ## **Benchmarking**
 
 Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **16 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono stati i seguenti:
@@ -334,38 +338,49 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 
 Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
 
+#### **Scalabilità forte:**
+
 <table>
 <tr>
-<td>Matrice 1000 * 1000:</td>
+<td><b>Matrice 1000 * 1000:</b></td>
 </tr>
 <tr>
 <td><img src="docs/Images/Strong1000.png"/></td>
 <td><img src="docs/Images/SpeedUP1000.png"/></td>
 </tr>
 <tr>
-<td>Matrice 2500 * 2500:</td>
+<td><b>Matrice 2500 * 2500:</b></td>
 </tr>
 <tr>
 <td><img src="docs/Images/Strong2500.png"/></td>
 <td><img src="docs/Images/SpeedUP2500.png"/></td>
 </tr>
 <tr>
-<td>Matrice 5000 * 5000:</td>
+<td><b>Matrice 5000 * 5000:</b></td>
 </tr>
 <tr>
 <td><img src="docs/Images/Strong5000.png"/></td>
 <td><img src="docs/Images/SpeedUP5000.png"/></td>
 </tr>
-<tr>
-<td>Weak Scalability:</td>
-</tr>
+</table>
+
+#### **Scalabilità debole:**
+
+<table>
 <tr>
 <td><img src="docs/Images/Weak.png"/></td>
 </tr>
 </table>
 
-### **Descrizione dei risultati**
+#### **Descrizione dei risultati:**
+
+I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento significativo delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processi. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente.
 
 ## **Correttezza**
+
+la correttezza dell'algoritmo può essere valutata in principalemente grazie a due aspetti.
+
+In primo luogo l'implementazione ricevuto in input una matrice costante e con numero di core costante restituisce sempre la stessa soluzione:
+
 
 ## **Conclusioni**
