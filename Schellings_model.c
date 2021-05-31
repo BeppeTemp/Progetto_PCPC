@@ -9,13 +9,13 @@
 #define OUTPUT_TYPE 0  //? 0 HTML output, 1 CLI output. 2 CLI reduced
 
 //*#region Computation settings
-#define RANDOM_MATRIX 1   //? Choose between random (1) or static matrix(0)
+#define RANDOM_MATRIX 0   //? Choose between random (1) or static matrix(0)
 #define ROWS 100           //? Number of rows
 #define COLUMNS 100        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
-#define SAT_THRESHOLD 35  //? Percentage of satisfaction required
-#define N_ITERACTION 100  //? Number of iteration calculated
+#define SAT_THRESHOLD 40  //? Percentage of satisfaction required
+#define N_ITERACTION 500  //? Number of iteration calculated
 #define ASSIGN_SEED 10    //? Seed for free location assignment
 //#endregion
 

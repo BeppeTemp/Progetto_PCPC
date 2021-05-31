@@ -1,15 +1,16 @@
 # **[Schelling's model of segregation](https://en.wikipedia.org/wiki/Schelling's_model_of_segregation)**
 
-Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Cloud 2020/21**.
+Progetto di corso per l'esame di **Programmazione Concorrente e Parallela su Cloud AC 2020/21** curriculum **Cloud Computing**.
 
-- Studente: **Giuseppe Arienzo**
-- Matricola: **0522501062**
-- Data di consegna: **01/06/2021**
+- Studente: **Giuseppe Arienzo**.
+- Matricola: **0522501062**.
+- Data di consegna: **01/06/2021**.
 
 ___
+
 ## **Sommario** ##
 
-  - [**Sommario**](#sommario)
+
   - [**Descrizione del problema:**](#descrizione-del-problema)
     - [**Segregazione spaziale:**](#segregazione-spaziale)
     - [**Modello di Schelling:**](#modello-di-schelling)
@@ -31,29 +32,30 @@ ___
   - [**Conclusioni**](#conclusioni)
 
 ___
+
 ## **Descrizione del problema:**
 
 La seguente implementazione si pone l'obbiettivo di realizzare una simulazione del modello di **segregazione di Schelling**, tramite l'uso del linguaggio **C** e della libreria **MPI (Message Passing Interface).**
+
 ### **Segregazione spaziale:** ###
 
 La **segregazione residenziale** (o **spaziale**) è un fenomeno sociale che consiste nell'occupazione separata, da parte di diversi gruppi umani, di aree spaziali collocate all'interno di determinati orizzonti geopolitici, come un'area urbana, una località, una regione, uno stato.
 
 ### **Modello di Schelling:** ###
 
-A cavallo tra gli anni **60** e **70** del **Novecento**, l'economista **Thomas Schelling**, condusse una serie di studi con cui si proponeva di indagare l'influenza delle preferenze individuali nel determinare la segregazione spaziale; 
+A cavallo tra gli anni **60** e **70** del **Novecento**, l'economista **Thomas Schelling**, condusse una serie di studi con cui si proponeva di indagare l'influenza delle preferenze individuali nel determinare la segregazione spaziale;
 
 Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall' **"infelicità"** della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
 
-<img src="docs/Images/Sample.png"/>
+<p style="text-align: center;"><img src="./docs/Images/Anim.gif"></p>
 
-___
 ## **Descrizione dell'implementazione**
 
-La seguente implementazione si basa su **cinque passi di computazione** ben definiti, che permettono di dividere la matrice in parti ragionevolmente uguali tra i processi, indentificare gli agenti **insoddisfatti** spostandoli in determinate posizioni libere sparse sulla matrice.
+La seguente implementazione si basa su **cinque passi di computazione** ben definiti, che permettono di dividere la matrice in parti ragionevolmente uguali tra i processi, **indentificare gli agenti insoddisfatti** e di ****spostarli**** in determinate posizioni libere sparse sulla matrice.
 
 ### **Divisione della matrice tra i processi coinvolti**
 
-Per dividere il carico di lavoro tra i vari processi è stato inizialmente valutata la possibilità di dividere la matrice in modo perfettamente equo tra questi ultimi, andando cioè a valutare divisioni composte da sotto sezioni di righe. Successivamente si è però notato che tale soluzione creava un notevole spreco dal punto di vista del tempo di computazione, che rendeva vano ogni miglioramento dovuto all distribuzione più equa degli agenti, si è per questo motivo optato per una soluzione più classica dividendo la matrice per righe, in questo modo nel caso pessimo uno o più agenti gestiscono **COLLUMS** agenti in più rispetto agli altri.
+Per dividere il carico di lavoro tra i vari processi è stato inizialmente valutata la possibilità di dividere la matrice in modo perfettamente equo tra questi ultimi, andando cioè a valutare divisioni composte da sotto sezioni di righe. Successivamente si è però notato che tale soluzione creava un notevole spreco dal punto di vista del tempo di computazione, che rendeva vano ogni miglioramento dovuto alla distribuzione più equa degli agenti, si è per questo motivo optato per una soluzione più "classica" dividendo la matrice per righe, in questo modo nel caso pessimo uno o più agenti gestiscono **COLLUMS** agenti in più rispetto agli altri.
 
 La divisione effettiva viene infine realizzata tramite l'utilizzo di una **ScatterV**:
 
@@ -90,9 +92,9 @@ void calcSizes(int wd_size, Data data) {
 }
 ```
 
-é importante notare come la seguente funzione si occupa anche del calcolo delle grandezze necessarie alle successive operazioni di **Gather** con lo scopo riunire tutte le sotto matrici e presentare il risultato finale.
+> **Nota:** la seguente funzione si occupa anche del calcolo delle grandezze necessarie alle successive operazioni di **Gather** con lo scopo riunire tutte le sotto matrici e presentare il risultato finale.
 
-Tutti questi valori vengono inoltre conservati in una struttura dati **Data** che contiene tutti i dati necessari alla computazione per ogni processo, in particolare per quanto riguarda i dati relativi ai displacement e le section size, tutti i processi dispongono di tutti i dati, questo per evitare inutili e costose operazioni di **comunicazione:**
+Tutti questi valori vengono inoltre conservati in una struttura dati **Data** che contiene tutto ciò che è necessario alla computazione per ogni processo, in particolare per quanto riguarda le informazioni relative ai **displacements** e alle **section sizes**, sono distribuite in tutti i processi, questo per evitare inutili e costose operazioni di **comunicazione aggiuntive:**
 
 ```c
 typedef struct {
@@ -119,18 +121,19 @@ typedef struct {
 
 ### **Calcolo della soddisfazione degli agenti**
 
-Il calcolo della soddisfazione è stato effettuato tramite la funzione **calcSat** che data la posizione di un agente identifica il tipo di posizione di questo ultimo (**Angolo**, **Bordo** o **Centro**) e procede al calcolo della soddisfazione tramite la seguente formula:
+Il calcolo della soddisfazione è stato effettuato tramite la funzione **calcSat** che data la posizione di un agente identifica il tipo di posizione di quest'ultimo (**Angolo**, **Bordo** o **Centro**) e procede al calcolo della soddisfazione tramite la seguente formula:
 
 <p style="text-align: center;"><b> (neigh/100)*mykind </b></p>
 
-
 Dove ***neigh*** indica il numero di celle che circondano l'agente (**3 per gli angoli**, **5 per i bordi** e **8 per gli agenti centrali**) e ***mykind*** il numero di agenti nel vicinato appartenenti alla stessa specie.
+
+Il valore per cui un agente viene ritenuto soddisfatto viene definito tramite la costante **SAT_THRESHOLD**, di default questo valore è impostato a **33%** ma aumentandolo gli agenti si aggregano sempre di più ([**vedi prova di correttezza**](#correttezza)), in ogni caso, per garantire una buona efficienza si consiglia di non superare il **40%** di soddisfazione richiesta, infatti in tal caso sarà necessario, se si vuole ottenere una matrice completamente soddisfatta, andare ad aumentare il numero di iterazioni consentite tramite la costante **N_ITERACTION**
 
 ### **Assegnazione degli slot liberi**
 
 Gli slot liberi all'interno della matrice vengono identificati all'inizio di ogni iterazione in modo distribuito tramite l'utilizzo di una **All_Gather**, in sostanza ogni processo procede a identificare gli slot liberi presenti nella propria sottomatrice, che vengono poi aggregati e ridistribuiti.
 
-Successivamente gli slot indetificati vengono assegnati ai singoli processi. Questo avviene, con lo scopo di limitare al minimo le comunicazioni, tramite una funzione di ***shuffle*** che "disordina" il vettore in modo da randomizzare il modo in cui gli slot vengono assegnati, successicamente i processi prendono i primi **n_empty/world_size** elementi. 
+Successivamente gli slot indetificati vengono assegnati ai singoli processi. Questo avviene, con lo scopo di limitare al minimo le comunicazioni, tramite una funzione di ***shuffle*** che "disordina" il vettore in modo da randomizzare il modo in cui gli slot vengono assegnati, successicamente i processi prendono i primi **n_empty/world_size** elementi.
 
 ```c
 void shuffle(int *vet, int length) {
@@ -147,8 +150,8 @@ void shuffle(int *vet, int length) {
 
 Si è deciso di utilizzare questo metodo di assegnazioni degli slot liberi per due motivi:
 
-* **Riduzione delle comunicazioni e distribuzione del carico:** Essendo ogni processo in grado di calcolare i propri slot liberi, che utilizzerà per muovere i propri agenti insoddisfatti, in modo indipendente non è necessario un processo che si accolli tale onere, in questo modo i processi restano sincronizzati per tutta l'esecuzione del codice, oltre ad andare a ridurre tutte quelle comunicazioni che sarebbero state necessarie per comunicare le assegnazioni.
-* **Estetica della soluzione:** L'algoritmo di assegnazione scelto **"spreca"** consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).
+- **Riduzione delle comunicazioni e distribuzione del carico:** Essendo ogni processo in grado di calcolare i propri slot liberi, che utilizzerà per muovere i propri agenti insoddisfatti, in modo indipendente non è necessario un processo che si accolli tale onere, in questo modo i processi restano sincronizzati e "alla pari" per tutta l'esecuzione del codice, oltre ad andare a ridurre tutte quelle comunicazioni che sarebbero state necessarie per comunicare le assegnazioni.
+- **Estetica della soluzione:** L'algoritmo di assegnazione scelto **"spreca"** consciamente alcune posizioni vuote (nel caso pessimo ***world_size - 1***) in quanto un assegnazione non omogenea creerebbe matrici in cui la parte alta è più popolata di quella bassa (nel caso in cui vengano assegnate più posizioni a processi con rank più basso).
 
 La funziona che si occupa di tutto questo è **calcEmptySlots:**
 
@@ -198,13 +201,13 @@ int calcEmptySlots(Data data, int *my_emp_loc, int rank, int wd_size, int n_itc)
 
 ### **Spostamento degli agenti insoddisfatti**
 
-Una volta assegnate le posizioni vuote ai singoli processi, ognuno di essi identifica i primi **n_my_empty** (numero di celle vuote a disposizione) agenti insoddisfatti che saranno candidati allo spostamento, per ognuno di questi agenti vengono salvate tre informazioni:
+Una volta assegnate le posizioni vuote ai singoli processi, ognuno di essi identifica i primi **n_my_empty** (numero di celle vuote a disposizione) agenti insoddisfatti che saranno candidati allo spostamento, per ognuno di questi agenti vengono calcolate e salvate tre informazioni:
 
 - **Id_agent:** Che rappresenta la cella di "arrivo" del agente in movimento (una delle celle vuote assegnate al processo).
 - **id_reset:** Che rappresenta la cella di "partenza" del agente in spostamento e che quindi dovra essere azzerata.
 - **vl_agent:** Che rappresenta la tipologia dell'agente che si sta spostando.
 
-Tutte queste informazioni vengono successivamente aggregate all'interno della struttura data **Move** di cui array rappresenta tutte i movimenti che un determinato processo vuole eseguire.
+Tutte queste informazioni vengono successivamente aggregate all'interno della struttura dati **Move** di cui array rappresenta tutte i movimenti che un determinato processo sta eseguendo.
 
 ```c
 typedef struct {
@@ -219,7 +222,7 @@ typedef struct {
 } Move;
 ```
 
-Una volta che ogni processo ha popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di **Allgather**, cosi facendo tutti i processi possiederanno un array **Move** che contiene tutti gli spostamenti dell'iterazione corrente che permetterà di sincronizzare le proprio sotto matrici (**resettando celle** o **popolandole**).
+Una volta che ogni processo ha popolato il proprio vettore di movimenti (nel caso in cui non voglia fare spostamenti setta tutti valori a **-1,-1,n**) viene eseguita un operazione di **Allgather**, cosi facendo tutti i processi possiederanno un array **Move** che contiene tutti gli spostamenti in atto durante l'iterazione corrente e, singolarmente scorrend questo vettore, saranno in grado di aggiornare le proprie sottomatrici **resettando** o **popolandole** celle.
 
 La funzione che si occupa di questo è **Move:**
 
@@ -253,7 +256,9 @@ void move(Data data, Move *my_moves, MPI_Datatype move_data_type, int wd_size, i
 
 ### **Aggregazione dei risultati e presentazione**
 
-Il massimo numero di iterazioni che vengono computate viene definito dalla costante **N_ITERACTION**, inoltre l'implementazione ad ogni computazione effettuando una **All_Reduce** del numero di agenti insoddisfatti identificati è in grado di fermare, se occorre, la computazione.
+Com'è stato precedentemente illustrato il massimo numero di iterazioni consentite viene definito dalla costante **N_ITERACTION**, tale valore è però solo un valore indicativo in quanto l'implementazione, effettuando una **All_Reduce** del numero di agenti insoddisfatti identificati in ogni iterazione è in grado di fermare, se occorre, la computazione in modo anticipato.
+
+> **Nota:** si è notate che l'implementazione è in grado di soddisfare completamente (con una soglia di soddisfazione del 33%) anche matrici molto grandi in circa 40 iterazioni.
 
 ```c
 //Check if all processes have finished their movements
@@ -263,7 +268,7 @@ MPI_Allreduce(&is_over, &tot_over, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 return (tot_over == 0);
 ```
 
-Infine al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather nel processo 0, che rappresenta il master della computazione, questo processo si occuperà infine della stampa del risulatato.
+Infine al termine dell'ultima iterazione le sottomatici vengono infine aggregate tramite l'uso di una gather nel processo 0, che rappresenta il master della computazione, che si occuperà infine della stampa del risultato.
 
 ```c
 void gatherResult(Data data, int rank, char *i_mat) {
@@ -279,7 +284,57 @@ void gatherResult(Data data, int rank, char *i_mat) {
     free(section);
 }
 ```
+
+
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type='text/javascript'>
+      google.charts.load('current', {'packages':['annotationchart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Kepler-22b mission');
+        data.addColumn('string', 'Kepler title');
+        data.addColumn('string', 'Kepler text');
+        data.addColumn('number', 'Gliese 163 mission');
+        data.addColumn('string', 'Gliese title');
+        data.addColumn('string', 'Gliese text');
+        data.addRows([
+          [new Date(2314, 2, 15), 12400, undefined, undefined,
+                                  10645, undefined, undefined],
+          [new Date(2314, 2, 16), 24045, 'Lalibertines', 'First encounter',
+                                  12374, undefined, undefined],
+          [new Date(2314, 2, 17), 35022, 'Lalibertines', 'They are very tall',
+                                  15766, 'Gallantors', 'First Encounter'],
+          [new Date(2314, 2, 18), 12284, 'Lalibertines', 'Attack on our crew!',
+                                  34334, 'Gallantors', 'Statement of shared principles'],
+          [new Date(2314, 2, 19), 8476, 'Lalibertines', 'Heavy casualties',
+                                  66467, 'Gallantors', 'Mysteries revealed'],
+          [new Date(2314, 2, 20), 0, 'Lalibertines', 'All crew lost',
+                                  79463, 'Gallantors', 'Omniscience achieved']
+        ]);
+
+        var chart = new google.visualization.AnnotationChart(document.getElementById('chart_div'));
+
+        var options = {
+          displayAnnotations: true
+        };
+
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id='chart_div' style='width: 900px; height: 600px;'></div>
+  </body>
+
+
+
 ___
+
 ## **Note sull'implementazione**
 
 L'implementazione mette a disposizione tre tipologie di output, selezionabili tramite il flag **OUTPUT_TYPE** presente nella parte iniziale del codice:
@@ -325,7 +380,9 @@ Esempio di comando di esecuzione:
 ```bash
 mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Schellings_model.out
 ```
+
 ___
+
 ## **Benchmarking**
 
 Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **16 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono stati i seguenti:
@@ -344,37 +401,23 @@ Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
 
 #### **Scalabilità forte:**
 
-<table>
-<tr>
-<td><b>Matrice 1000 * 1000:</b></td>
-</tr>
-<tr>
-<td><img src="docs/Images/Strong1000.png"/></td>
-<td><img src="docs/Images/SpeedUP1000.png"/></td>
-</tr>
-<tr>
-<td><b>Matrice 2500 * 2500:</b></td>
-</tr>
-<tr>
-<td><img src="docs/Images/Strong2500.png"/></td>
-<td><img src="docs/Images/SpeedUP2500.png"/></td>
-</tr>
-<tr>
-<td><b>Matrice 5000 * 5000:</b></td>
-</tr>
-<tr>
-<td><img src="docs/Images/Strong5000.png"/></td>
-<td><img src="docs/Images/SpeedUP5000.png"/></td>
-</tr>
-</table>
+|               Matrice 1000 * 1000:             |                                              |
+| :--------------------------------------------: | :------------------------------------------: |
+| ![same2_1](./docs/Images/Strong1000.png)       | ![same2_2](./docs/Images/SpeedUP1000.png)    |
+
+|               Matrice 2500 * 2500:             |                                              |
+| :--------------------------------------------: | :------------------------------------------: |
+| ![same2_1](./docs/Images/Strong2500.png)       | ![same2_2](./docs/Images/SpeedUP2500.png)    |
+
+|               Matrice 5000 * 5000:             |                                              |
+| :--------------------------------------------: | :------------------------------------------: |
+| ![same2_1](./docs/Images/Strong5000.png)       | ![same2_2](./docs/Images/SpeedUP5000.png)    |
 
 #### **Scalabilità debole:**
 
-<table>
-<tr>
-<td><img src="docs/Images/Weak.png"/></td>
-</tr>
-</table>
+|               Matrice 1000 * 1000:             |
+| :--------------------------------------------: |
+| ![same2_1](./docs/Images/Weak.png)             |
 
 ### **Descrizione dei risultati:**
 
@@ -386,25 +429,19 @@ la correttezza dell'algoritmo può essere valutata in principalemente grazie a d
 
 In primo luogo l'implementazione ricevuto in input una matrice costante e con numero di core costante restituisce sempre la stessa soluzione:
 
-<table>
-<tr>
-<td><img src="docs/Images/Sample1.png"/></td>
-<td><img src="docs/Images/Sample2.png"/></td>
-</tr>
-</table>
+|           Prima Iterazione (4 Processi)        |        Seconda Iterazione (4 Processi)       |           Prima Iterazione (3 Processi)        |        Seconda Iterazione (3 Processi)       |
+| :--------------------------------------------: | :------------------------------------------: | :--------------------------------------------: | :------------------------------------------: |
+| ![same2_1](./docs/Images/Sample1.png)          | ![same2_1](./docs/Images/Sample2.png)        | ![same2_1](./docs/Images/Sample3.png)          | ![same2_1](./docs/Images/Sample4.png)        |
 
-In secondo luogo è possibile apprezzare come la matrice da disordinata e caotica si riorganizza andando a creare dei gruppi ben definiti di agenti,c he sono particolarmene evidenti per matrici molto grandi.
+In secondo luogo è possibile apprezzare come la matrice da disordinata e caotica si riorganizza andando a creare dei gruppi ben definiti di agenti, che sono particolarmene evidenti per matrici molto grandi.
 
-<table>
-<td><b>Matrice finale:</b></td>
-<tr>
-<td><img src="docs/Images/Correttezza1.png"/></td>
-</tr>
-<td><b>Matrice iniziale:</b></td>
-<tr>
-<td><img src="docs/Images//Correttezza2.png"/></td>
-</tr>
-</table>
+|          Matrice Finale (Sat. 33%)             |       Matrice Iniziale (Sat. 33%)            |
+| :--------------------------------------------: | :------------------------------------------: |
+|       ![same2_1](./docs/Images/Cor1.png)       |      ![same2_1](./docs/Images/Cor2.png)      |
+
+|          Matrice Finale (Sat. 40%)             |       Matrice Iniziale (Sat. 40%)            |
+| :--------------------------------------------: | :------------------------------------------: |
+|       ![same2_1](./docs/Images/Cor3.png)       |      ![same2_1](./docs/Images/Cor4.png)      |
 
 ## **Conclusioni**
 
