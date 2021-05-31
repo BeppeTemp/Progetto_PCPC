@@ -285,7 +285,7 @@ void gatherResult(Data data, int rank, char *i_mat) {
 }
 ```
 
-
+<html>
   <head>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type='text/javascript'>
@@ -330,7 +330,7 @@ void gatherResult(Data data, int rank, char *i_mat) {
   <body>
     <div id='chart_div' style='width: 900px; height: 600px;'></div>
   </body>
-
+</html>
 
 
 ___
