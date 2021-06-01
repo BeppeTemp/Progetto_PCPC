@@ -305,6 +305,10 @@ L'implementazione mette a disposizione tre tipologie di output, selezionabili tr
 - **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte (**NB:** si sconsiglia l'utilizzo di questa modalità di output per matrici molto grandi).
 - **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, (**NB:** si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi).
 
+|                     HTML                       |                   CLI                        |                     CLI_Reduced                |
+| :--------------------------------------------: | :------------------------------------------: | :--------------------------------------------: |
+|       ![same2_1](./docs/Images/HTML.png)       |     ![same2_1](./docs/Images/CLI.png)        |    ![same2_1](./docs/Images/CLI_Red.png)       |
+
 ### **Compilazione**
 
 Un esempio di comando di compilazione è il seguente:
@@ -354,29 +358,55 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
   
 - **Matrice da 1000 colonne e 1000 righe a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
 
-### **Risultati ottenuti**
+### **Primo Test: Scalabilità forte su matrice 1000*1000**
 
-Seguono i risultati ottenuti e i rispettivi valori di **SpeedUP.**
+| vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| **Tempo** | 3,64 | 2,07 | 2,02 | 1,94 | 2,13 | 2,12 | 2,21 | 2,35 | 2,43 |
+| **Efficienza** | 100,00 % | 88,14 % | 45,03 % | 31,22 % | 21,33 % | 17,20 % | 13,71 % | 11,06 % | 9,36 % |
 
-#### **Scalabilità forte:**
+#### **Grafici**
 
-|               Matrice 1000 * 1000:             |                                              |
+|    ![same2_1](./docs/Images/Eff1000.png)       |    ![same2_2](./docs/Images/Temp1000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
-| ![same2_1](./docs/Images/Strong1000.png)       | ![same2_2](./docs/Images/SpeedUP1000.png)    |
 
-|               Matrice 2500 * 2500:             |                                              |
+### **Secondo Test: Scalabilità forte su matrice 2500*2500**
+
+| vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| **Tempo** | 25,70 | 16,12 | 15,83 | 14,87 | 15,02 | 18,80 | 19,34 | 18,82 | 19,40 |
+| **Efficienza** | 100,00 | 79,69 | 40,57 | 28,80 | 21,38 | 13,67 | 11,07 | 9,75 | 8,28 |
+
+#### **Grafici**
+
+|    ![same2_1](./docs/Images/Eff2500.png)       |    ![same2_2](./docs/Images/Temp2500.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
-| ![same2_1](./docs/Images/Strong2500.png)       | ![same2_2](./docs/Images/SpeedUP2500.png)    |
 
-|               Matrice 5000 * 5000:             |                                              |
+### **Terzo Test: Scalabilità forte su matrice 2500*2500**
+
+| vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| **Tempo** | 123,94 | 78,22 | 76,44 | 74,60 | 71,03 | 75,71 | 81,71 | 91,46 | 97,77 |
+| **Efficienza** | 100,00 | 79,23 | 40,54 | 27,69 | 21,81 | 16,37 | 12,64 | 9,68 | 7,92 |
+
+#### **Grafici**
+
+|    ![same2_1](./docs/Images/Eff5000.png)       |    ![same2_2](./docs/Images/Temp5000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
-| ![same2_1](./docs/Images/Strong5000.png)       | ![same2_2](./docs/Images/SpeedUP5000.png)    |
 
-#### **Scalabilità debole:**
+### **Quarto Test: Scalabilità debole**
 
-|               Matrice 1000 * 1000:             |
-| :--------------------------------------------: |
-| ![same2_1](./docs/Images/Weak.png)             |
+| vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| **Numero di Righe** | **1000** | **2000** | **4000** | **6000** | **8000** | **10000** | **12000** | **14000** | **16000** |
+| **Tempo** | 3,79 | 7,62 | 13,28 | 16,92 | 21,99 | 22,00 | 24,88 | 26,19 | 31,36 |
+| **Efficienza** | 100,00 | 49,78 | 28,55 | 22,41 | 17,24 | 17,23 | 15,24 | 14,48 | 12,09 |
+
+
+#### **Grafici**
+
+|    ![same2_1](./docs/Images/weakeff.png)       |    ![same2_2](./docs/Images/weaktime.pngg)   |
+| :--------------------------------------------: | :------------------------------------------: |
 
 ### **Descrizione dei risultati:**
 
