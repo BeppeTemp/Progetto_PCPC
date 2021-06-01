@@ -10,7 +10,7 @@ ___
 
 ## **Sommario** ##
 
-
+  - [**Sommario**](#sommario)
   - [**Descrizione del problema:**](#descrizione-del-problema)
     - [**Segregazione spaziale:**](#segregazione-spaziale)
     - [**Modello di Schelling:**](#modello-di-schelling)
@@ -20,13 +20,15 @@ ___
     - [**Assegnazione degli slot liberi**](#assegnazione-degli-slot-liberi)
     - [**Spostamento degli agenti insoddisfatti**](#spostamento-degli-agenti-insoddisfatti)
     - [**Aggregazione dei risultati e presentazione**](#aggregazione-dei-risultati-e-presentazione)
+    - [**Flusso di esecuzione:**](#flusso-di-esecuzione)
   - [**Note sull'implementazione**](#note-sullimplementazione)
     - [**Compilazione**](#compilazione)
     - [**Esecuzione**](#esecuzione)
   - [**Benchmarking**](#benchmarking)
-    - [**Risultati ottenuti**](#risultati-ottenuti)
-      - [**Scalabilità forte:**](#scalabilità-forte)
-      - [**Scalabilità debole:**](#scalabilità-debole)
+    - [**Primo Test: Scalabilità forte su matrice 1000*1000**](#primo-test-scalabilità-forte-su-matrice-10001000)
+    - [**Secondo Test: Scalabilità forte su matrice 2500*2500**](#secondo-test-scalabilità-forte-su-matrice-25002500)
+    - [**Terzo Test: Scalabilità forte su matrice 5000*5000**](#terzo-test-scalabilità-forte-su-matrice-50005000)
+    - [**Quarto Test: Scalabilità debole**](#quarto-test-scalabilità-debole)
     - [**Descrizione dei risultati:**](#descrizione-dei-risultati)
   - [**Correttezza**](#correttezza)
   - [**Conclusioni**](#conclusioni)
@@ -348,7 +350,7 @@ ___
 
 ## **Benchmarking**
 
-Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **64 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono:
+Il benchmarking dell'implementazione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **64 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono:
 
 - **Matrice 1000*1000:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
   
@@ -356,9 +358,9 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
   
 - **Matrice 5000*5000:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
   
-- **Matrice da 1000 colonne e 1000 righe a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
+- **Matrice da 1000 colonne e un numero variabile di righe (1000 per vCPU) a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
 
-### **Primo Test:** Scalabilità forte su matrice 1000*1000
+### **Primo Test: Scalabilità forte su matrice 1000*1000**
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -370,7 +372,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff1000.png)       |    ![same2_2](./docs/Images/Temp1000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Secondo Test:** Scalabilità forte su matrice 2500*2500
+### **Secondo Test: Scalabilità forte su matrice 2500*2500**
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -382,7 +384,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff2500.png)       |    ![same2_2](./docs/Images/Temp2500.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Terzo Test:** Scalabilità forte su matrice 5000*5000
+### **Terzo Test: Scalabilità forte su matrice 5000*5000**
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -394,7 +396,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff5000.png)       |    ![same2_2](./docs/Images/Temp5000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Quarto Test:** Scalabilità debole
+### **Quarto Test: Scalabilità debole**
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -410,7 +412,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 
 ### **Descrizione dei risultati:**
 
-I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processi. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente.
+I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processori. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente. Tuttavia l'efficienza migliore si ottiene tendenzialmente utilizzando due processori, mentre i tempi di computazione migliore sono da attribuire all'utilizzo di sei o più processori. Altre considerazioni in merito sono espresse nelle [**conclusioni**](#conclusioni).
 
 ## **Correttezza**
 
