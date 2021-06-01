@@ -47,7 +47,7 @@ A cavallo tra gli anni **60** e **70** del **Novecento**, l'economista **Thomas 
 
 Schelling utilizzò un modello a più agenti intelligenti: il cui movimento da una casella all'altra era condizionato, ogni volta, dall' **"infelicità"** della posizione occupata, a sua volta legato al colore delle pedine più vicine: tali modelli hanno mostrato che è sufficiente che le persone coltivino una blanda preferenza di qualche tipo (ad esempio, etnica, sociale, culturale, ecc.) perché l'effetto di scelte individuali ispirate da tali preferenze debolissime si componga in un fenomeno complessivo di totale segregazione.
 
-<p style="text-align: center;"><img src="./docs/Images/Anim.gif"></p>
+![same2_1](./docs/Images/Anim.gif)
 
 ## **Descrizione dell'implementazione**
 
@@ -285,8 +285,11 @@ void gatherResult(Data data, int rank, char *i_mat) {
 }
 ```
 
+### **Flusso di esecuzione:**
 
+Il seguente flow chart, mostra in modo approssimativo come vengono eseguiti i vari passi di esecuzione:
 
+![same2_1](./docs/Images/Flow.png)
 
 ___
 
@@ -299,8 +302,8 @@ L'implementazione mette a disposizione tre tipologie di output, selezionabili tr
 ```
 
 - **HTML:** Formatta l'output in una pagina html che oltre alla matrice risultante e iniziale, mostra le impostazioni dell'esecuzione nonchè alcune statistiche sul tempo di computazione impiegato e il numero di iterazione effettuate.
-- **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte.
-- **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi.
+- **CLI:** Mostra all'interno della linea di comando la matrice risultatente e la mastrice iniziale, nonchè il tempo di esecuzione e il numero di iterazioni svolte (**NB:** si sconsiglia l'utilizzo di questa modalità di output per matrici molto grandi).
+- **CLI_Reduced:** Mostra solamente il tempo di esecuzione totale e il numero di iterazioni svolte, (**NB:** si consiglia l'uso di questa modalità nel caso in cui si vogliano testare matrici particolamente grandi).
 
 ### **Compilazione**
 
@@ -310,9 +313,7 @@ Un esempio di comando di compilazione è il seguente:
 mpicc Schellings_model.c -o Schellings_model.out
 ```
 
-### **Esecuzione**
-
-Prima di avviare l'esecuzione è possibile modificare le impostazioni di quest'ultima all'interno del codice sorgente:
+Prima di effettuare la compilazione è possibile modificare le impostazioni di quest'ultimo all'interno del codice sorgente:
 
 ```c
 //* Outuput type
@@ -330,17 +331,20 @@ Prima di avviare l'esecuzione è possibile modificare le impostazioni di quest'u
 //#endregion
 ```
 
+### **Esecuzione**
+
 Esempio di comando di esecuzione:
 
 ```bash
-mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np 4 Schellings_model.out
+mpirun --allow-run-as-root --mca btl_vader_single_copy_mechanism none -np X Schellings_model.out
 ```
 
+dove 'X' è un numero intero e rappresenta il numero di processori coinvolti.
 ___
 
 ## **Benchmarking**
 
-Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **16 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono stati i seguenti:
+Il benchmarking della soluzione è stato effettuato su un cluster di quattro macchine **m4.xlarge** per un totale di **16 vCPUs** e **64 Gb di RAM**. Sono stati effettuati in totale quattro test, per andare a valutare la **Strong** e la **Weak Scalability**, più nel dettaglio i test effettuati sono:
 
 - **Matrice 1000*1000:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs**, con **cinque ripetizioni ognuno**. Con lo scopo di valutare la **Strong Scalability.**
   

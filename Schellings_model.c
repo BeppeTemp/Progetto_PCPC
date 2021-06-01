@@ -561,11 +561,10 @@ void main() {
             data.n_my_empty = calcEmptySlots(data, data.my_emp_loc, rank, wd_size, n_itc);
 
             if (n_itc == N_ITERACTION) {
-                //End of computation test
                 data.my_emp_loc = realloc(data.my_emp_loc, sizeof(int) * data.n_my_empty);
             }
 
-            //Identification of the agents to be moved
+            //Identification of the agents to be moved and end of computation test
             Move *my_moves = malloc(sizeof(Move) * data.n_my_empty);
             if (findMoves(data, my_moves, rank, wd_size)) break;
 
