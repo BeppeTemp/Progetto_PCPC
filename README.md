@@ -25,6 +25,7 @@ ___
     - [**Compilazione**](#compilazione)
     - [**Esecuzione**](#esecuzione)
   - [**Benchmarking**](#benchmarking)
+  - [**Alcuni concetti legati al benchmarking:**](#alcuni-concetti-legati-al-benchmarking)
     - [**Primo Test: Scalabilità forte su matrice 1000*1000**](#primo-test-scalabilità-forte-su-matrice-10001000)
     - [**Secondo Test: Scalabilità forte su matrice 2500*2500**](#secondo-test-scalabilità-forte-su-matrice-25002500)
     - [**Terzo Test: Scalabilità forte su matrice 5000*5000**](#terzo-test-scalabilità-forte-su-matrice-50005000)
