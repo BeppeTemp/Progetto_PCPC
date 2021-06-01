@@ -358,7 +358,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
   
 - **Matrice da 1000 colonne e 1000 righe a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
 
-### **Primo Test: Scalabilità forte su matrice 1000*1000**
+### **Primo Test:** Scalabilità forte su matrice 1000*1000
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -370,7 +370,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff1000.png)       |    ![same2_2](./docs/Images/Temp1000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Secondo Test: Scalabilità forte su matrice 2500*2500**
+### **Secondo Test:** Scalabilità forte su matrice 2500*2500
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -382,7 +382,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff2500.png)       |    ![same2_2](./docs/Images/Temp2500.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Terzo Test: Scalabilità forte su matrice 2500*2500**
+### **Terzo Test:** Scalabilità forte su matrice 5000*5000
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -394,7 +394,7 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 |    ![same2_1](./docs/Images/Eff5000.png)       |    ![same2_2](./docs/Images/Temp5000.png)    |
 | :--------------------------------------------: | :------------------------------------------: |
 
-### **Quarto Test: Scalabilità debole**
+### **Quarto Test:** Scalabilità debole
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
 | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -405,12 +405,12 @@ Il benchmarking della soluzione è stato effettuato su un cluster di quattro mac
 
 #### **Grafici**
 
-|    ![same2_1](./docs/Images/weakeff.png)       |    ![same2_2](./docs/Images/weaktime.pngg)   |
+|    ![same2_1](./docs/Images/weakeff.png)       |    ![same2_2](./docs/Images/weaktime.png)   |
 | :--------------------------------------------: | :------------------------------------------: |
 
 ### **Descrizione dei risultati:**
 
-I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento significativo delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processi. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente.
+I risultati ottenuti hanno mostrato come il passaggio alla computazione parallela porti un incremento delle performance, che viene mantenuto tendenzialmente anche all'aumentare del numero di processi. Com'era però ragionevole aspettarsi, questo miglioramento si disperde man mano che il numero di **vCPUs** aumenta in quanto **l'overhead** dovuto alla comunicazione diventa più presente.
 
 ## **Correttezza**
 
