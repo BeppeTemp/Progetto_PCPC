@@ -360,6 +360,15 @@ Il benchmarking dell'implementazione è stato effettuato su un cluster di quattr
   
 - **Matrice da 1000 colonne e un numero variabile di righe (1000 per vCPU) a vCPUs:** su rispettivamente **1, 2, 4, 6, 8, 10, 12, 14, 16 vCPUs** per andare a valutare la **Weak Scalability.**
 
+## **Alcuni concetti legati al benchmarking:**
+
+- **SpeedUP:** misura la riduzione del tempo di esecuzione dell’algoritmo eseguito su **n** processori rispetto all’esecuzione sequenziale. Tale misura è in genere minore del numero di processori mentre lo speed-up ideale assume valore **n**. Lo speed-up per la **strong scalability** è stato calcolato mediante la seguente formula: **Sp = T1 /Tp** dove **T1** è il tempo d'esecuzione su un singolo processore mentre **Tp** è il tempo d'esecuzione dell'algoritmo con **n** processori.
+
+- **Weak Scalability:** indica l'accelerazione per una dimensione del problema scalata rispetto al numero di processori, ed è regolato dalla legge di **Gustafson**. L'efficienza della weak scalability è stata calcolata tramite la seguente formula: **Ep = (T1/Tp)*100%**.
+
+- **Strong Scalability:** indica l'accelerazione per una dimensione del problema fissa rispetto al numero di processori, ed è regolato dalla legge di **Amdahl**. L'efficienza della strong scalability è stata calcolata tramite la seguente formula: **Ep = T1/(P*Tp))*100%**.
+
+
 ### **Primo Test: Scalabilità forte su matrice 1000*1000**
 
 | vCPUs | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 |
