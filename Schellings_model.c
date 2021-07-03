@@ -11,7 +11,7 @@
 //*#region Computation settings
 #define RANDOM_MATRIX 1   //? Choose between random (1) or static matrix(0)
 #define ROWS 10           //? Number of rows
-#define COLUMNS 10        //? Number of columns
+#define COLUMNS 5        //? Number of columns
 #define O_PERCENTAGE 33   //? Percentage of O agents
 #define X_PERCENTAGE 33   //? Percentage of X agents
 #define SAT_THRESHOLD 33  //? Percentage of satisfaction required
